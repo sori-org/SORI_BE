@@ -1,8 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends
 from sqlalchemy.orm import Session
-from app.database.session import get_db
-from app.models.content import Content
-from app.services.generator import generate_content
+from src.database.session import get_db
+from src.models.content import Content
+from src.services.generator import generate_content
 import json
 
 router = APIRouter()

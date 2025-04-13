@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from app.api import content
-from app.database.session import engine
-from app.models.base import Base
+from src.api import content
+from src.database.session import engine
+from src.models.base import Base
 
 Base.metadata.create_all(bind=engine)
 

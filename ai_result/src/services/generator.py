@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-from app.models.common import Platform, Item, Format, Gender, Age, ExternalData
-from app.database.session import SessionLocal
+from src.models.common import Platform, Item, Format, Gender, Age, ExternalData
+from src.database.session import SessionLocal
 import openai, os
-from app.core.config import settings
+from src.core.config import settings
 
 openai.api_key = settings.OPENAI_API_KEY
 
