@@ -1,0 +1,11 @@
+아래 정보를 참고하여 SNS 마케팅 콘텐츠를 작성해줘.
+
+홍보 대상: {item}
+타겟: {gender}, {age}
+콘텐츠 형식: {format}
+외부 정보: {external}
+추가 요청사항: {request}
+
+결과:
+Caption: (짧고 감성적으로)
+Hashtags: #해시태그1, #해시태그2, ...
