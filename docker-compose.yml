@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  db:
+  db: #MySQL
     image: mysql:8.0
     container_name: sori-db
     restart: always
@@ -18,6 +18,16 @@ services:
     ]
     volumes:
       - sori_data:/var/lib/mysql
-
+  api: #FastAPI
+    build: .
+    container_name: sori-api
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 volumes:
   sori_data:
