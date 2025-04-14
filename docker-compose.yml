@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: sori-db
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: sori_root
+      MYSQL_DATABASE: sori_db
+      MYSQL_USER: sori_user
+      MYSQL_PASSWORD: sori_pass
+    command: [
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_general_ci"
+    ]
+    volumes:
+      - sori_data:/var/lib/mysql
+
+volumes:
+  sori_data:
