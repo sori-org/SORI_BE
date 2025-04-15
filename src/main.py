@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from .database.database import Base, engine
 from .routers import kakao_login, platform_test, users
 from fastapi.middleware.cors import CORSMiddleware
-from src.models import *
+
 import logging
 
 # UTF8 Response 설정
