@@ -19,12 +19,8 @@ def extract_user_info(user_info: dict):
     profile = user_info.get("kakao_account", {}).get("profile", {})
 
     nickname = profile.get("nickname")
-    profile_image = profile.get("profile_image_url")
-    thumbnail_image = profile.get("thumbnail_image_url")
 
     return {
         "kakao_id": kakao_id,
         "nickname": nickname,
-        "profile_image": profile_image,
-        "thumbnail_image": thumbnail_image,
     }

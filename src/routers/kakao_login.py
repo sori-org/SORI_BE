@@ -21,7 +21,7 @@ class KakaoCallbackPayload(BaseModel):
     redirectUri: str
 
 
-@router.api_route("/callback", methods=["POST", "OPTIONS"])
+@router.api_route("/callback", methods=["GET", "POST", "OPTIONS"])
 def kakao_login(
     payload: KakaoCallbackPayload = Body(None),
     db: Session = Depends(get_db)
@@ -60,6 +60,10 @@ def kakao_login(
     user, is_new = get_or_create_kakao_user(db, user_data, access_token)
 
     # ✅ 3. JWT 발급
-    access_token = create_access_token(data={"sub": str(user.user_id)})
+    jwt_token = create_access_token(data={"sub": str(user.user_id)})
+    print("🔍 응답 본문:", jwt_token)
 
-    return user_data
+    return {
+        "user": user_data,
+        "jwt": jwt_token
+    }
