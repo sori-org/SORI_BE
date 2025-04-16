@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, Request
 from pydantic import BaseModel
 import requests
 import os
@@ -22,15 +22,20 @@ class KakaoCallbackPayload(BaseModel):
 
 
 @router.api_route("/callback", methods=["GET", "POST", "OPTIONS"])
-def kakao_login(
-    payload: KakaoCallbackPayload = Body(None),
+async def kakao_login(
+    request: Request,
     db: Session = Depends(get_db)
 ):
-    if payload is None:
-        return {"message": "Preflight OK"}  # OPTIONS 요청 대응
+    if request.method == "GET": # GET
+        code = request.query_params.get("code")
+        redirect_uri = request.query_params.get("redirectUri")
+    else:  # POST
+        body = await request.json()
+        code = body.get("code")
+        redirect_uri = body.get("redirectUri")
 
-    code = payload.code
-    redirect_uri = payload.redirectUri
+    if not code or not redirect_uri:
+        raise HTTPException(status_code=400, detail="code 또는 redirectUri 누락")
 
     # 1. 인가코드로 토큰 요청
     data = {
