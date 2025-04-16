@@ -28,7 +28,7 @@ async def kakao_login(
 ):
     if request.method == "GET": # GET
         code = request.query_params.get("code")
-        redirect_uri = request.query_params.get("redirectUri")
+        redirect_uri = os.getenv("KAKAO_REDIRECT_URI")
     else:  # POST
         body = await request.json()
         code = body.get("code")
