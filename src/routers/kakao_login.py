@@ -55,14 +55,14 @@ async def kakao_login(
     print("🔍 응답 상태코드:", token_res.status_code)
     print("🔍 응답 본문:", token_res.text)
 
-    access_token = token_res.json().get("access_token")
+    kakao_access_token = token_res.json().get("access_token")
 
     # 2. 토큰으로 유저 정보 요청
-    kakao_user = get_kakao_user_info(access_token)
+    kakao_user = get_kakao_user_info(kakao_access_token)
     user_data = extract_user_info(kakao_user)
 
     # DB에 유저 저장 or 조회
-    user, is_new = get_or_create_kakao_user(db, user_data, access_token)
+    user, is_new = get_or_create_kakao_user(db, user_data, kakao_access_token)
 
     # ✅ 3. JWT 발급
     jwt_token = create_access_token(data={"sub": str(user.user_id)})
