@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.database.database import SessionLocal
 from src import models, schemas
-from src.schemas.store import StoreCreate, StoreOut
+from src.schemas.stores import StoreCreate, StoreOut
 
 router = APIRouter(prefix="/stores", tags=["Stores"])
 

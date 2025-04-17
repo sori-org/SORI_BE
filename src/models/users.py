@@ -1,7 +1,7 @@
 from sqlalchemy import Column, BigInteger, String, ForeignKey, Text
 from src.database.database import Base
 
-class Users(Base):
+class User(Base):
     __tablename__ = "users"
 
     user_id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
@@ -12,5 +12,5 @@ class Users(Base):
         nullable=True
     )
     display_name = Column(String(20), nullable=False)
-    profile_image = Column(Text, nullable=True)
-    phone_number = Column(String(20), nullable=True)
+    profile_image = Column(String(2048), nullable=True)
+

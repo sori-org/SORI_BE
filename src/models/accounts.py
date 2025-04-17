@@ -1,9 +1,10 @@
-from sqlalchemy import Column, BigInteger, Boolean
+from sqlalchemy import Column, BigInteger, Boolean, String
 from src.database.database import Base
 
-class Accounts(Base):
+class Account(Base):
     __tablename__ = "accounts"
 
     account_id = Column(BigInteger, primary_key=True, autoincrement=True)
     kakao_id = Column(BigInteger, unique=True, index=True, nullable=False)
+    refresh_token = Column(String(512), nullable=True)
     is_deleted = Column(Boolean, default=False, nullable=False)
