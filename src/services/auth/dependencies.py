@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from src.database.database import get_db
-from src.models.users import Users
+from src.models.users import User
 import os
 from dotenv import load_dotenv
 
@@ -29,7 +29,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise credentials_exception
 
     print("🔐 decoded payload:", payload)
-    user = db.query(Users).filter(Users.user_id == user_id).first()
+    user = db.query(User).filter(User.user_id == user_id).first()
     print("✅ user from DB:", user)
     if user is None:
         raise credentials_exception
