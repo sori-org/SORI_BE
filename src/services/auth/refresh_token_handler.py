@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from src.models.accounts import Account
 
 def save_refresh_token(db: Session, account_id: int, refresh_token: str):
-    account = db.query(Account).filter(Account.id == account_id).first()
+    account = db.query(Account).filter(Account.account_id == account_id).first()
     if not account:
         raise ValueError("Account not found")
 
@@ -12,7 +12,7 @@ def save_refresh_token(db: Session, account_id: int, refresh_token: str):
     return account
 
 def delete_refresh_token(db: Session, account_id: int):
-    account = db.query(Account).filter(Account.id == account_id).first()
+    account = db.query(Account).filter(Account.account_id == account_id).first()
     if not account:
         raise ValueError("Account not found")
 
