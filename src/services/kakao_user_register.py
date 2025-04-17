@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from src.models.users import User
 from src.models.accounts import Account
-from src.services.auth.kakao_auth import unlink_kakao_user
+from src.services.auth.kakao_unlink import unlink_kakao_user
 
 def get_or_create_kakao_user(db: Session, kakao_user_data: dict, access_token: str):
     kakao_id = kakao_user_data["kakao_id"]

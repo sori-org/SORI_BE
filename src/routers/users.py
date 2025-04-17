@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.database.database import get_db
 from src.services.auth.dependencies import get_current_user
-from src.services.auth.kakao_auth import unlink_kakao_user  # 카카오 unlink 함수
+from src.services.auth.kakao_unlink import unlink_kakao_user  # 카카오 unlink 함수
 from src.schemas.users import UserOut
 
 router = APIRouter(prefix="/users", tags=["User"])
