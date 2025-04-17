@@ -15,4 +15,5 @@ class Content(Base):
     image_url = Column(String(2048), nullable=True)
     request_text = Column(String(500), nullable=True)
     user_image_url = Column(String(500), nullable=True)
+    result_text = Column(String(2000), nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
