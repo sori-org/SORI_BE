@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from src.database.database import get_db
 from src.services.auth.dependencies import get_current_user
@@ -18,29 +18,18 @@ def get_my_info(
 
 
 @router.delete("/me")
+@router.delete("/me")
 def delete_my_account(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    kakao_access_token: str = Header(alias="X-Kakao-Access-Token")  # 🔥 여기!
 ):
-    print("🔥 current_user:", current_user)
-    print("🔥 account_id:", current_user.account_id)
-
-    account = db.query(Account).filter_by(account_id=current_user.account_id).first()
-    print("🔥 account:", account)
-
-    if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
-
-    print("🔥 access_token:", account.access_token)
-
     try:
-        unlink_kakao_user(account.access_token)
+        unlink_kakao_user(kakao_access_token)
     except Exception as e:
-        print("❌ unlink 실패:", e)
         raise HTTPException(status_code=500, detail=f"카카오 unlink 실패: {e}")
 
     db.delete(current_user)
-    db.delete(account)
     db.commit()
 
     return {"message": "회원탈퇴 완료"}
