@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from src.db.database import Base
 
 class Platform(Base):
@@ -7,3 +7,4 @@ class Platform(Base):
     platform_id = Column(Integer, primary_key=True, autoincrement=True)
     platform_name = Column(String(100), nullable=False)
     is_deleted = Column(Boolean, default=False, nullable=False)
+

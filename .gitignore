@@ -1,0 +1,33 @@
+# Python 가상환경
+.venv/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# 캐시/컴파일 파일
+__pycache__/
+*.pyc
+*.pyo
+
+# 환경변수 파일
+.env
+
+# IDE 설정
+.idea/
+.vscode/
+
+# 노드 모듈
+node_modules/
+
+# DB 백업
+*.sql
+*.dump
+
+# 로그
+*.log
+
+# 기타
+sori_be_clean/
+SORI_BE.git/
+SORI_BE.git.bfg-report/
+patches/
