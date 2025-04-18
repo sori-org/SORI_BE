@@ -51,7 +51,8 @@ async def kakao_login(
 
     token_res = requests.post(KAKAO_TOKEN_URL, data=data)
     if token_res.status_code != 200:
-        raise HTTPException(status_code=400, detail="카카오 토큰 요청 실패")
+        print("❌ 카카오 토큰 요청 실패 응답:", token_res.text)
+        raise HTTPException(status_code=400, detail=f"카카오 토큰 요청 실패: {token_res.text}")
 
     print("🔍 응답 상태코드:", token_res.status_code)
     print("🔍 응답 본문:", token_res.text)
