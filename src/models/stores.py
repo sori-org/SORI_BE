@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, ForeignKey, String
+from sqlalchemy import Column, BigInteger, ForeignKey, String, Text
 from src.db.database import Base
 
 class Store(Base):

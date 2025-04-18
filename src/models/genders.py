@@ -6,3 +6,4 @@ class Gender(Base):
 
     gender_id = Column(Integer, primary_key=True, autoincrement=True)
     gender_category = Column(String(20), nullable=False)
+

@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+  db: #MySQL
+    image: mysql:8.0
+    container_name: sori-db
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: sori_root
+      MYSQL_DATABASE: sori_db
+      MYSQL_USER: sori_user
+      MYSQL_PASSWORD: sori_pass
+    command: [
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_general_ci"
+    ]
+    volumes:
+      - sori_data:/var/lib/mysql
+  api: #FastAPI
+    build: .
+    container_name: sori-api
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  sori_data:

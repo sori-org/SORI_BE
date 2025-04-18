@@ -6,6 +6,7 @@ class StoreCreate(BaseModel):
     store_address: str
     store_category: str
     store_phone: str
+    store_description: str
 
 class StoreResponse(BaseModel):
     message: str = "가게가 성공적으로 등록되었습니다."
