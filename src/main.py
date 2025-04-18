@@ -39,7 +39,7 @@ app.add_middleware(
 app.include_router(kakao_login.router)
 app.include_router(platform_test.router)
 app.include_router(users.router)
-pp.include_router(store.router, prefix="/stores")
+app.include_router(store.router, prefix="/stores")
 app.include_router(search.router, prefix="/search")
 
 # ✅ 상태 확인용 라우트
