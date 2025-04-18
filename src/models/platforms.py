@@ -6,5 +6,4 @@ class Platform(Base):
 
     platform_id = Column(Integer, primary_key=True, autoincrement=True)
     platform_name = Column(String(100), nullable=False)
-    is_deleted = Column(Boolean, default=False, nullable=False)
 

@@ -31,7 +31,11 @@ def delete_my_account(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"카카오 unlink 실패: {e}")
 
+    account = db.query(Account).filter(Account.account_id == current_user.account_id).first()
+
     db.delete(current_user)
+    if account:
+        db.delete(account)
     db.commit()
 
     return {"message": "회원탈퇴 완료"}

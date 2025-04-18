@@ -8,7 +8,7 @@ def get_or_create_kakao_user(db: Session, kakao_user_data: dict, access_token: s
     kakao_id = kakao_user_data["kakao_id"]
 
     # 1. accounts 테이블에서 kakao_id로 검색
-    account = db.query(Account).filter_by(kakao_id=kakao_id, is_deleted=False).first()
+    account = db.query(Account).filter_by(kakao_id=kakao_id).first()
 
     if account:
         # 유저도 찾기
