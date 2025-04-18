@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
+from typing import Optional
 from sqlalchemy.orm import Session
 from src.database.database import get_db
 from src.services.auth.dependencies import get_current_user
@@ -18,12 +19,13 @@ def get_my_info(
 
 
 @router.delete("/me")
-@router.delete("/me")
 def delete_my_account(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-    kakao_access_token: str = Header(alias="X-Kakao-Access-Token")  # 🔥 여기!
+    kakao_access_token: Optional[str] = Header(None, alias="X-Kakao-Access-Token")  # 이거!!
 ):
+
+    print("🧪 받은 kakao_access_token:", kakao_access_token)  # 여기에 찍히는지 확인
     try:
         unlink_kakao_user(kakao_access_token)
     except Exception as e:
