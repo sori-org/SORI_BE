@@ -19,7 +19,7 @@ database_url = f"mysql+pymysql://{db_user}:{db_pass}@{db_host}:{db_port}/{db_nam
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
 # ✅ 3. Import Base and all models to register them
-from src.database.database import Base
+from src.db.database import Base
 from src.models.users import User
 from src.models.accounts import Account
 from src.models.stores import Store

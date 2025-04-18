@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String
-from src.database.database import Base
+from src.db.database import Base
 
 class Format(Base):
     __tablename__ = "formats"

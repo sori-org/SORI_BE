@@ -1,5 +1,5 @@
 from sqlalchemy import Column, BigInteger, Integer, String, ForeignKey, TIMESTAMP, func
-from src.database.database import Base
+from src.db.database import Base
 
 class Content(Base):
     __tablename__ = "contents"

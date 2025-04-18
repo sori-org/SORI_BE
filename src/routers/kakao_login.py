@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from src.services.kakao_user_info import get_kakao_user_info, extract_user_info
 from src.services.kakao_user_register import get_or_create_kakao_user
-from src.database.database import get_db
+from src.db.database import get_db
 from src.services.auth.jwt_handler import create_access_token
 from src.services.auth.refresh_token_handler import save_refresh_token
 

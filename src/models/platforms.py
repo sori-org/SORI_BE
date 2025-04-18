@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean
-from src.database.database import Base
+from src.db.database import Base
 
 class Platform(Base):
     __tablename__ = "platforms"
