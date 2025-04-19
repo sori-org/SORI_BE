@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 
+from src.schemas.users import UserOut
 from src.services.kakao_user_info import get_kakao_user_info, extract_user_info
 from src.services.kakao_user_register import get_or_create_kakao_user
 from src.db.database import get_db
