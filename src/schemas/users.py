@@ -12,10 +12,12 @@ class UserCreate(UserBase):
 
 
 class UserOut(UserBase):
-    user_id: int
-    account_id: int
-    main_store_id: Optional[int] = None
+    userId: int = Field(..., alias="user_id")
+    accountId: int = Field(..., alias="account_id")
+    displayName: str = Field(..., alias="display_name")
+    mainStoreId: Optional[int] = Field(None, alias="main_store_id")
     storeList: Optional[List[StoreOut]] = []
 
     class Config:
         from_attributes = True
+        populate_by_name = True
