@@ -5,4 +5,4 @@ class AgeBase(BaseModel):
     age_category: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
