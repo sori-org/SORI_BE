@@ -36,8 +36,8 @@ app.add_middleware(
 )
 
 # 라우터 등록
-app.include_router(kakao_login.router, prefix="/api/kakao")
-app.include_router(users.router, prefix="/api/users")
+app.include_router(kakao_login.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
 app.include_router(store.router, prefix="/stores")
 app.include_router(search.router, prefix="/search")
 
