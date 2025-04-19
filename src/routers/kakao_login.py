@@ -77,6 +77,6 @@ async def kakao_login(
     print("🔍 jwt_token:", jwt_token)
 
     return {
-        "user": user_data,
+        "user": UserOut.from_orm(user),
         "jwt": jwt_token
     }
