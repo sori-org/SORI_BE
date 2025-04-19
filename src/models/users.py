@@ -15,4 +15,4 @@ class User(Base):
     display_name = Column(String(20), nullable=False)
     profile_image = Column(String(2048), nullable=True)
 
-    stores = relationship("Store", back_populates="user")
+    stores = relationship("Store", back_populates="user", foreign_keys="Store.user_id")
