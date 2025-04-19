@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from .db.database import Base, engine
-from .routers import kakao_login, platform_test, users
+from .routers import kakao_login, users
 from fastapi.middleware.cors import CORSMiddleware
 from src.api import store, search
 import logging
@@ -36,8 +36,7 @@ app.add_middleware(
 )
 
 # 라우터 등록
-app.include_router(kakao_login.router, prefix="/api/kakao_login")
-app.include_router(platform_test.router)
+app.include_router(kakao_login.router, prefix="/api/kakao")
 app.include_router(users.router, prefix="/api/users")
 app.include_router(store.router, prefix="/stores")
 app.include_router(search.router, prefix="/search")
