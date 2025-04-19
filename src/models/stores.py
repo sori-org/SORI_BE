@@ -11,3 +11,5 @@ class Store(Base):
     store_category = Column(String(255), nullable=True)
     store_phone = Column(String(20), nullable=True)
     store_description = Column(String(500), nullable=True)
+
+    user = relationship("User", back_populates="stores")
