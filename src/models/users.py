@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, ForeignKey, Text
+from sqlalchemy import Column, BigInteger, String, ForeignKey, Text, relationship
 from src.db.database import Base
 
 class User(Base):
