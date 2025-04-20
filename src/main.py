@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from .db.database import Base, engine
 from .routers import kakao_login, users, refresh
 from fastapi.middleware.cors import CORSMiddleware
-from src.api import store, search
+
 import logging
 
 # UTF8 Response 설정
@@ -39,6 +39,5 @@ app.add_middleware(
 app.include_router(kakao_login.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(refresh.router, prefix="/api")
-app.include_router(store.router, prefix="/stores")
-app.include_router(search.router, prefix="/search")
+
 
