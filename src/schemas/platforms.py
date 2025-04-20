@@ -5,4 +5,4 @@ class PlatformBase(BaseModel):
     platform_name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
