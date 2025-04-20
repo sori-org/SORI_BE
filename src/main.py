@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from .db.database import Base, engine
-from .routers import kakao_login, users, refresh
+from .routers import kakao_login, users #, refresh
 from fastapi.middleware.cors import CORSMiddleware
 
 import logging
@@ -38,6 +38,6 @@ app.add_middleware(
 # 라우터 등록
 app.include_router(kakao_login.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
-app.include_router(refresh.router, prefix="/api")
+# app.include_router(refresh.router, prefix="/api")
 
 
