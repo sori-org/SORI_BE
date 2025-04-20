@@ -16,6 +16,13 @@ def search_places(query: str) -> list[dict]:
     }
 
     response = requests.get(url, headers=headers, params=params)
+
+    # 디버깅 코드
+    print("🔍 검색 쿼리:", query)
+    print("🔗 요청 URL:", response.url)
+    print("📡 응답 상태 코드:", response.status_code)
+    print("📄 응답 내용:", response.text)
+
     items = response.json().get("items", [])
 
     places = []

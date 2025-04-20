@@ -19,3 +19,10 @@ class UserOut(UserBase):
 
     class Config:
         orm_mode = True
+
+
+class NicknameUpdate(BaseModel):
+    nickname: str
+
+class DefaultStoreUpdate(BaseModel):
+    store_id: int

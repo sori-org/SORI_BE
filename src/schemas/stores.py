@@ -11,3 +11,34 @@ class StoreBase(BaseModel):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
+
+        from pydantic import BaseModel
+
+        class StoreUpdate(BaseModel):
+            name: str
+            phone: str
+            description: str
+
+        class StoreOut(BaseModel):
+            store_id: int
+            name: str
+            phone: str
+            description: str
+
+            class Config:
+                orm_mode = True
+
+
+class StoreUpdate(BaseModel):
+    name: str
+    phone: str
+    description: str
+
+class StoreOut(BaseModel):
+    store_id: int
+    name: str
+    phone: str
+    description: str
+
+    class Config:
+        orm_mode = True
