@@ -9,7 +9,7 @@ class StoreBase(BaseModel):
     description: str = Field(..., alias="store_description")
 
     class Config:
-        from_attributes = True
+        orm_mode = True
         allow_population_by_field_name = True
 
 
