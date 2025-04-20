@@ -22,3 +22,18 @@ class StoreOut(BaseModel): #StoreList 출력용
 
     class Config:
         from_attributes = True
+
+
+class StoreUpdate(BaseModel):
+    name: str
+    phone: str
+    description: str
+
+class StoreOut(BaseModel):
+    store_id: int
+    name: str
+    phone: str
+    description: str
+
+    class Config:
+        from_attributes = True

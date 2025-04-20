@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from src.schemas.store_schema import StoreOut
 
@@ -21,3 +21,9 @@ class UserOut(UserBase):
     class Config:
         from_attributes = True
         populate_by_name = True
+
+class NicknameUpdate(BaseModel):
+    displayName: str
+
+class DefaultStoreUpdate(BaseModel):
+    store_id: int
