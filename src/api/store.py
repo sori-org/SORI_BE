@@ -19,26 +19,7 @@ def register_store(store: StoreCreate, db: Session = Depends(get_db)):
     return new_store
 
 
-# [1] 닉네임 수정
-@router.patch("/nickname", summary="닉네임 수정")
-def update_nickname(
-        body: NicknameUpdate,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
-):
-    current_user.nickname = body.nickname
-    db.commit()
-    return {"message": "닉네임이 수정되었습니다."}
 
-
-# [2] 소유 가게 목록 조회
-@router.get("/my", response_model=list[StoreOut], summary="내 소유 가게 목록 조회")
-def get_my_stores(
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
-):
-    stores = db.query(Store).filter(Store.owner_id == current_user.user_id).all()
-    return stores
 
 
 # [3] 가게 상세 조회
