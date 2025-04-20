@@ -6,6 +6,7 @@ pyvenv.cfg
 
 # 캐시/컴파일 파일
 __pycache__/
+__pycache__
 *.pyc
 *.pyo
 

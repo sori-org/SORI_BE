@@ -1,5 +1,6 @@
 from sqlalchemy import Column, BigInteger, String, ForeignKey, Text
 from src.db.database import Base
+from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = "users"
@@ -13,3 +14,5 @@ class User(Base):
     )
     display_name = Column(String(20), nullable=False)
     profile_image = Column(String(2048), nullable=True)
+
+    stores = relationship("Store", back_populates="user", foreign_keys="Store.user_id")

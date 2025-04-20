@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from .db.database import Base, engine
-from .routers import kakao_login, platform_test, users
+from .routers import kakao_login, users #, refresh
 from fastapi.middleware.cors import CORSMiddleware
+from src.api import store, search
 
 import logging
 
@@ -36,13 +37,9 @@ app.add_middleware(
 )
 
 # 라우터 등록
-app.include_router(kakao_login.router)
-app.include_router(platform_test.router)
-app.include_router(users.router)
+app.include_router(kakao_login.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+# app.include_router(refresh.router, prefix="/api")
+app.include_router(store.router, prefix="/stores")
+app.include_router(search.router, prefix="/search")
 
-# ✅ 상태 확인용 라우트
-@app.get("/ping")
-def ping():
-    name = "임윤승"
-    logging.info(f"✅ 이름: {name}")
-    return {"name": name}

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, BigInteger, ForeignKey, String, Text
 from src.db.database import Base
+from sqlalchemy.orm import relationship
 
 class Store(Base):
     __tablename__ = "stores"
@@ -11,3 +12,5 @@ class Store(Base):
     store_category = Column(String(255), nullable=True)
     store_phone = Column(String(20), nullable=True)
     store_description = Column(String(500), nullable=True)
+
+    user = relationship("User", back_populates="stores", foreign_keys=[user_id])

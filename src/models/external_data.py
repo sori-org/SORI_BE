@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, Column, ForeignKey, String, Text
+from sqlalchemy import Integer, Column, ForeignKey, String, Text
 from src.db.database import Base
 
 class ExternalData(Base):

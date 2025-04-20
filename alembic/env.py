@@ -9,7 +9,7 @@ from alembic import context
 # ✅ 1. Load .env for DB connection info
 load_dotenv()
 
-database_url = "DATABASE_URL"
+database_url = os.getenv("DATABASE_URL")
 
 # ✅ 2. Setup system path for module import
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))

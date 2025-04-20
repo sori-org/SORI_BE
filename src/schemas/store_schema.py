@@ -11,3 +11,29 @@ class StoreCreate(BaseModel):
 class StoreResponse(BaseModel):
     message: str = "가게가 성공적으로 등록되었습니다."
     store_id: int
+
+class StoreOut(BaseModel): #StoreList 출력용
+    id: int
+    name: str
+    address: str
+    category: str
+    phone: str
+    description: str
+
+    class Config:
+        from_attributes = True
+
+
+class StoreUpdate(BaseModel):
+    name: str
+    phone: str
+    description: str
+
+class StoreOut(BaseModel):
+    store_id: int
+    name: str
+    phone: str
+    description: str
+
+    class Config:
+        from_attributes = True

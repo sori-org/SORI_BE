@@ -1,11 +1,10 @@
-from pydantic import BaseModel
-from typing import Optional
-
+from pydantic import BaseModel, Field
+from typing import Optional, List
+from src.schemas.store_schema import StoreOut
 
 class UserBase(BaseModel):
     display_name: str
     profile_image: Optional[str] = None
-    phone_number: Optional[str] = None
 
 
 class UserCreate(UserBase):
@@ -13,9 +12,18 @@ class UserCreate(UserBase):
 
 
 class UserOut(UserBase):
-    user_id: int
-    account_id: int
-    main_store_id: Optional[int] = None
+    userId: int = Field(..., alias="user_id")
+    accountId: int = Field(..., alias="account_id")
+    displayName: str = Field(..., alias="display_name")
+    mainStoreId: Optional[int] = Field(None, alias="main_store_id")
+    storeList: Optional[List[StoreOut]] = []
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+        populate_by_name = True
+
+class NicknameUpdate(BaseModel):
+    displayName: str
+
+class DefaultStoreUpdate(BaseModel):
+    store_id: int
