@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.db.database import get_db, SessionLocal
 from src.models import User, Store
-from src.schemas import StoreOut, StoreUpdate, NicknameUpdate, DefaultStoreUpdate
+from src.schemas.stores import StoreOut, StoreUpdate
+from src.schemas.users import NicknameUpdate, DefaultStoreUpdate
 from src.services.auth.dependencies import get_current_user
 from src import models, schemas
 from src.schemas.stores import StoreCreate, StoreOut
