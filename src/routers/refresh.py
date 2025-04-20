@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
-from src.database.database import get_db
+from database.database import get_db
 from src.services.auth.jwt_handler import create_access_token
 from src.services.auth.refresh_token_handler import verify_refresh_token, hash_token
 from src.models.accounts import Account
