@@ -1,4 +1,4 @@
-rom pydantic import BaseModel
+from pydantic import BaseModel
 
 class PlaceSearchResponse(BaseModel):
     title: str

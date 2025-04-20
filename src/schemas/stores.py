@@ -12,21 +12,21 @@ class StoreBase(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
 
-        from pydantic import BaseModel
 
-        class StoreUpdate(BaseModel):
-            name: str
-            phone: str
-            description: str
+class StoreUpdate(BaseModel):
+    name: str
+    phone: str
+    description: str
 
-        class StoreOut(BaseModel):
-            store_id: int
-            name: str
-            phone: str
-            description: str
+class StoreOut(BaseModel):
+    store_id: int
+    name: str
+    phone: str
+    description: str
 
-            class Config:
-                orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class StoreCreate(BaseModel):
     user_id: int  # 추후 로그인 연동 시 자동 처리
