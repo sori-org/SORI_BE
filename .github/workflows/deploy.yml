@@ -13,7 +13,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup SSH and known_hosts
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_ed25519
@@ -22,9 +22,9 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh ${{ secrets.EC2_HOST }} "
+          ssh -i ~/.ssh/id_ed25519 ubuntu@${{ secrets.EC2_HOST }} "
             cd ~/SORI_BE &&
-            git pull origin main &&
+            git pull origin development &&
             docker-compose down &&
             docker-compose up -d --build
           "
