@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
-from src.schemas.store_schema import StoreOut
+from src.schemas.stores import StoreOut
 
 class UserBase(BaseModel):
     display_name: str
