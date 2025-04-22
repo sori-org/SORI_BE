@@ -4,11 +4,14 @@ from sqlalchemy.orm import Session
 from src.db.database import get_db
 from src.services.auth.dependencies import get_current_user
 from src.services.auth.kakao_unlink import unlink_kakao_user  # 카카오 unlink 함수
-from src.schemas.users import UserOut
+from src.schemas.users import UserOut, NicknameUpdate
+from src.schemas.stores import StoreBase
+from src.schemas.store_schema import StoreOut
 from src.models.users import User
 from src.models.accounts import Account
 
-router = APIRouter(prefix="/users", tags=["User"])
+
+router = APIRouter(prefix="/user", tags=["User"])
 
 # 🔍 현재 로그인된 유저 정보 반환
 @router.get("/me", response_model=UserOut)

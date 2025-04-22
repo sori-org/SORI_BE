@@ -5,7 +5,7 @@ from .routers import kakao_login, users #, refresh
 from fastapi.middleware.cors import CORSMiddleware
 from src.api import store, search
 
-import logging
+import logging, os
 
 # UTF8 Response 설정
 class UTF8JSONResponse(JSONResponse):
@@ -15,7 +15,7 @@ class UTF8JSONResponse(JSONResponse):
 
 # FastAPI 앱 생성
 app = FastAPI(default_response_class=UTF8JSONResponse)
-
+print("🔍 현재 DATABASE_URL:", os.getenv("DATABASE_URL"))
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 

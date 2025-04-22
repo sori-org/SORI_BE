@@ -16,6 +16,6 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=1
     return encoded_jwt
 
 # 예시: 사용자 정보
-data = {"sub": "1", "role": "user"}
+data = {"sub": "2", "role": "user"}
 token = create_access_token(data)
 print("✅ 발급된 토큰:\n", token)

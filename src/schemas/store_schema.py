@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class StoreCreate(BaseModel):
     user_id: int  # 추후 로그인 연동 시 자동 처리
@@ -12,28 +13,20 @@ class StoreResponse(BaseModel):
     message: str = "가게가 성공적으로 등록되었습니다."
     store_id: int
 
-class StoreOut(BaseModel): #StoreList 출력용
-    id: int
-    name: str
-    address: str
-    category: str
-    phone: str
-    description: str
+class StoreOut(BaseModel):
+    store_id: int
+    store_name: str
+    store_address: Optional[str]
+    store_category: Optional[str]
+    store_phone: Optional[str]
+    store_description: Optional[str]
 
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class StoreUpdate(BaseModel):
     name: str
     phone: str
     description: str
-
-class StoreOut(BaseModel):
-    store_id: int
-    name: str
-    phone: str
-    description: str
-
-    class Config:
-        from_attributes = True
