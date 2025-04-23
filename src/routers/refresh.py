@@ -1,15 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, Header, Cookie, HTTPException
 from sqlalchemy.orm import Session
-from database.database import get_db
-from src.services.auth.jwt_handler import create_access_token
-from src.services.auth.refresh_token_handler import verify_refresh_token, hash_token
+from src.db.database import get_db
 from src.models.accounts import Account
+from src.services.auth.refresh_token_handler import hash_token
+import requests
+import os
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/refresh")
-def refresh_access_token(
-    refresh_token: str = Header(..., alias="X-Refresh-Token"),
+def refresh_kakao_access_token(
+    refresh_token: str = Cookie(...),
     db: Session = Depends(get_db)
 ):
     hashed = hash_token(refresh_token)
@@ -18,7 +19,20 @@ def refresh_access_token(
     if not account:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    # ✅ 새 access_token 발급
-    new_token = create_access_token(data={"sub": str(account.account_id)})
+    # 카카오 토큰 갱신 요청
+    data = {
+        "grant_type": "refresh_token",
+        "client_id": os.getenv("KAKAO_REST_API_KEY"),
+        "refresh_token": refresh_token
+    }
 
-    return {"access_token": new_token}
+    token_res = requests.post("https://kauth.kakao.com/oauth/token", data=data)
+    if token_res.status_code != 200:
+        raise HTTPException(status_code=400, detail="카카오 access_token 갱신 실패")
+
+    new_access_token = token_res.json().get("access_token")
+
+    if not new_access_token:
+        raise HTTPException(status_code=500, detail="access_token 누락")
+
+    return {"access_token": new_access_token}
