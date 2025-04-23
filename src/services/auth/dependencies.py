@@ -12,12 +12,12 @@ load_dotenv()
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/jwt_token")
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
-        status_code=401,
+        status_code=40101604,
         detail="Could not validate credentials",
     )
     try:
@@ -25,9 +25,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         print("🧪 payload:", payload)
         user_id: str = payload.get("sub")
         if user_id is None:
-            raise credentials_exception
+            raise HTTPException(status_code=401, detail="Invalid token payload")
     except JWTError:
-        raise credentials_exception
+        raise HTTPException(status_code=401, detail="Invalid token")
 
     print("🔐 decoded payload:", payload)
     user = db.query(User).filter(User.user_id == user_id).first()
