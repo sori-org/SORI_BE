@@ -15,10 +15,21 @@ router = APIRouter(tags=["Stores"])
 # [0] 가게 등록
 @router.post("/register", response_model=StoreResponse)
 def register_store(store: StoreCreate, db: Session = Depends(get_db)):
+    # 중복 등록 방지: 동일한 user_id + store_name + store_address 조합이 있는지 확인
+    existing_store = db.query(Store).filter(
+        Store.user_id == store.user_id,
+        Store.store_name == store.store_name,
+        Store.store_address == store.store_address
+    ).first()
+
+    if existing_store:
+        raise HTTPException(
+            status_code=400,
+            detail="해당 유저가 동일한 가게 정보를 이미 등록했습니다."
+        )
+
     new_store = create_store(db, store)
     return new_store
-
-
 
 
 
