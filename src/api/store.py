@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from src.schemas.store_schema import StoreCreate, StoreResponse, StoreOut, StoreUpdate
@@ -15,7 +16,6 @@ router = APIRouter(tags=["Stores"])
 # [0] 가게 등록
 @router.post("/register", response_model=StoreResponse)
 def register_store(store: StoreCreate, db: Session = Depends(get_db)):
-    # 중복 등록 방지: 동일한 user_id + store_name + store_address 조합이 있는지 확인
     existing_store = db.query(Store).filter(
         Store.user_id == store.user_id,
         Store.store_name == store.store_name,
@@ -29,7 +29,22 @@ def register_store(store: StoreCreate, db: Session = Depends(get_db)):
         )
 
     new_store = create_store(db, store)
-    return new_store
+
+    user = db.query(User).filter(User.user_id == store.user_id).first()
+    is_main = False
+    if user and user.main_store_id is None:
+        user.main_store_id = new_store.store_id
+        db.commit()
+        is_main = True
+
+    return {
+        "store_id": new_store.store_id,
+        "store_name": new_store.store_name,
+        "store_address": new_store.store_address,
+        "user_id": new_store.user_id,
+        "message": "대표 가게로 등록되었습니다." if is_main else "가게가 정상적으로 등록되었습니다."
+    }
+
 
 
 
