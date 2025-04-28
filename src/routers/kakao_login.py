@@ -12,7 +12,11 @@ from src.db.database import get_db
 from src.services.auth.jwt_handler import create_jwt_token
 from src.services.auth.refresh_token_handler import save_refresh_token
 
-router = APIRouter(prefix="/kakao", tags=["Kakao Login"])
+router = APIRouter(
+    prefix="/api/auth/kakao",
+    tags=["Authentication"]
+)
+
 load_dotenv()
 
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
@@ -20,7 +24,7 @@ REST_API_KEY = os.getenv("KAKAO_REST_API_KEY")
 
 class KakaoCallbackPayload(BaseModel):
     code: str = Field(..., example="abc123인가코드")
-    redirectUri: str = Field(..., example="http://ec2-44-208-199-212.compute-1.amazonaws.com/api/kakao/callback")
+    redirectUri: str = Field(..., example="http://yourserver.com/api/auth/kakao/callback")
 
 def process_kakao_login(code: str, redirect_uri: str, db: Session):
     data = {
@@ -63,12 +67,20 @@ def process_kakao_login(code: str, redirect_uri: str, db: Session):
         )
     return response
 
-@router.get("/callback")
-async def kakao_callback_get(code: str, db: Session = Depends(get_db)):
+
+# [0] 카카오 인가 코드 수신 (GET 방식)
+@router.get("/callback", summary="카카오 인가 코드 수신 (GET)", description="query로 받은 code를 통해 카카오 로그인 처리.")
+async def kakao_callback_get(
+    code: str,
+    db: Session = Depends(get_db)
+):
     redirect_uri = os.getenv("KAKAO_REDIRECT_URI")
     return process_kakao_login(code, redirect_uri, db)
 
-@router.post("/callback")
-async def kakao_callback_post(payload: KakaoCallbackPayload = Body(...), db: Session = Depends(get_db)):
+# [1] 카카오 인가 코드 수신 (POST 방식)
+@router.post("/callback", summary="카카오 인가 코드 수신 (POST)", description="Body로 받은 code 및 redirectUri를 통해 카카오 로그인 처리.")
+async def kakao_callback_post(
+    payload: KakaoCallbackPayload = Body(...),
+    db: Session = Depends(get_db)
+):
     return process_kakao_login(payload.code, payload.redirectUri, db)
-

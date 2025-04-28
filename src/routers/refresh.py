@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, Cookie, HTTPException
+from fastapi import APIRouter, Depends, Cookie, HTTPException
 from sqlalchemy.orm import Session
 from src.db.database import get_db
 from src.models.accounts import Account
@@ -6,9 +6,14 @@ from src.services.auth.refresh_token_handler import hash_token
 import requests
 import os
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(
+    prefix="/api/auth",
+    tags=["Authentication"]
+)
 
-@router.post("/refresh")
+
+# [0] 카카오 access_token 재발급
+@router.post("/refresh", summary="카카오 access_token 재발급", description="저장된 refresh_token을 사용해서 새로운 access_token을 발급받음.")
 def refresh_kakao_access_token(
     refresh_token: str = Cookie(...),
     db: Session = Depends(get_db)
@@ -19,7 +24,6 @@ def refresh_kakao_access_token(
     if not account:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    # 카카오 토큰 갱신 요청
     data = {
         "grant_type": "refresh_token",
         "client_id": os.getenv("KAKAO_REST_API_KEY"),
