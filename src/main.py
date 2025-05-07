@@ -30,9 +30,7 @@ def on_startup():
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:8000",
-        "http://ec2-44-208-199-212.compute-1.amazonaws.com"
+        "*"
     ],
     allow_credentials=True,
     allow_methods=["*"],
