@@ -31,7 +31,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://29be-210-178-112-177.ngrok-free.app"
+        "http://localhost:8000",
+        "http://ec2-44-208-199-212.compute-1.amazonaws.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
