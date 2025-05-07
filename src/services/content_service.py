@@ -19,7 +19,7 @@ GENDER_MAP = {"male": 1, "female": 2}
 AGE_MAP = {"10-20": 1, "20-30": 2, "30-40": 3, "40-50": 4}
 EXTERNAL_DATA_MAP = {"weather": 1, "review": 2, "event": 3, "trend": 4}
 
-# GPT 문구 생성 함수
+# GPT 문구 생성
 def gpt_generate_text(prompt: str) -> str:
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -27,13 +27,15 @@ def gpt_generate_text(prompt: str) -> str:
     )
     return response.choices[0].message.content.strip()
 
-# 사용자 입력 저장 + 바로 생성 (문구, 해시태그, 이미지)
+# 사용자 입력 저장 + 바로 생성 (문구, 해시태그)
 def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> int:
+    from src.services.external_data_service import get_weather_data, get_event_data, get_review_data
+
     content = Content(
         user_id=user_id,
         platform_id=PLATFORM_MAP.get(data.sns_platform),
         format_id=FORMAT_MAP.get(data.content_format),
-        item_id=None,  # 아이템 매핑 추가 가능
+        item_id=None,
         age_id=AGE_MAP.get(data.age_range_target),
         gender_id=GENDER_MAP.get(data.gender_target),
         external_data_id=EXTERNAL_DATA_MAP.get(data.external_sources[0]) if data.external_sources else None,
@@ -43,13 +45,27 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
     db.commit()
     db.refresh(content)
 
+    # 외부 데이터 준비
+    extra_info = []
+    if "weather" in data.external_sources:
+        extra_info.append(get_weather_data("Seoul"))
+    if "event" in data.external_sources:
+        extra_info.append(get_event_data("1"))
+    if "review" in data.external_sources:
+        extra_info.append(get_review_data(data.promotion_name))
+
+    external_context = "\n".join(extra_info)
+
     # 홍보 문구 생성
     content.result_text = gpt_generate_text(
         f"""
         다음 정보를 바탕으로 짧은 홍보 문구를 만들어줘:
+
         - 홍보 대상: {data.promotion_name}
         - 타겟층: {data.gender_target}, {data.age_range_target}
         - 콘텐츠 형식: {data.content_format}
+        - 외부 정보:
+        {external_context}
         """
     )
 
@@ -64,11 +80,9 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
     hashtags = [tag for tag in hashtags if tag.startswith("#")]
     content.result_hashtag = " ".join(hashtags)
 
-    # 이미지 생성 (여기선 임시 URL)
-    content.image_url = f"https://dummyimage.com/600x400/{content.content_id}/fff.png"
-
     db.commit()
     return content.content_id
+
 
 # 최종 결과 조회
 def get_content_result(db: Session, content_id: int):
