@@ -88,7 +88,10 @@ def get_tour_events_by_location(lat: float, lng: float):
         try:
             root = ET.fromstring(response.text)
             items = root.find(".//items")
-            events = []
+            if items is None:
+                print("행사 아이템이 없습니다.")
+                return []
+                events = []
             for item in items.findall('item'):
                 event = {
                     "title": item.find('title').text,
@@ -216,10 +219,11 @@ if place_id:
     if reviews:
         print("⭐ 리뷰 정보:")
         for r in reviews:
-            author = r.get('author_name', '익명')
-            rating = r.get('rating', 'N/A')
-            text = r.get('text', '')
-            print(f"- {author} ({rating}점): {text}")
+            rating = r.get('rating', 0)
+            if rating in [4, 5]:  # ⭐ 4점, 5점만
+                author = r.get('author_name', '익명')
+                text = r.get('text', '')
+                print(f"- {author} ({rating}점): {text}")
     else:
         print("리뷰가 없습니다.")
 else:
