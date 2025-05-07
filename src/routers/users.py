@@ -18,7 +18,7 @@ router = APIRouter(prefix="/user", tags=["User"])
 def get_my_info(
     current_user=Depends(get_current_user)
 ):
-    return current_user
+    return UserOut.model_validate(current_user)
 
 
 @router.delete("/me")
