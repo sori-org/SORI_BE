@@ -16,7 +16,7 @@ router = APIRouter(
 def read_user_me(
     current_user: User = Depends(get_current_user)
 ):
-    return UserOut.from_orm(current_user)
+    return current_user
 
 
 # [1] 내 계정 삭제 (회원 탈퇴)

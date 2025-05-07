@@ -3,7 +3,7 @@ from typing import Optional, List
 from src.schemas.stores import StoreOut
 
 class UserBase(BaseModel):
-    display_name: str
+    displayName: str = Field(..., alias="display_name")
     profile_image: Optional[str] = None
 
 
@@ -14,7 +14,6 @@ class UserCreate(UserBase):
 class UserOut(UserBase):
     userId: int = Field(..., alias="user_id")
     accountId: int = Field(..., alias="account_id")
-    displayName: str = Field(..., alias="display_name")
     mainStoreId: Optional[int] = Field(None, alias="main_store_id")
     storeList: Optional[List[StoreOut]] = Field(default=[], alias="stores")
 
