@@ -39,12 +39,13 @@ app.add_middleware(
 )
 
 # 라우터 등록
-app.include_router(kakao_login.router, prefix="/api")
-app.include_router(users.router, prefix="/api")
-app.include_router(jwt_token.router, prefix="/api")
-app.include_router(refresh.router, prefix="/api")
-app.include_router(store.router, prefix="/stores")
-app.include_router(search.router, prefix="/search")
+app.include_router(kakao_login.router)
+app.include_router(users.router)
+app.include_router(jwt_token.router)
+app.include_router(refresh.router)
+app.include_router(store.router)
+app.include_router(search.router)
+
 
 def custom_openapi():
     if app.openapi_schema:

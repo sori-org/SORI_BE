@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
-from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.db.database import get_db
 from src.services.auth.dependencies import get_current_user
@@ -8,59 +7,49 @@ from src.schemas.users import NicknameUpdate, UserOut
 from src.schemas.stores import StoreBase
 from src.schemas.store_schema import StoreOut
 from src.models.users import User
-from src.models.accounts import Account
+from src.models.stores import Store
 
+router = APIRouter(
+    prefix="/api/users",
+    tags=["Users"]
+)
 
-router = APIRouter(prefix="/user", tags=["User"])
-
-# 🔍 현재 로그인된 유저 정보 반환
-@router.get("/me", response_model=UserOut)
-def get_my_info(
-    current_user=Depends(get_current_user)
+# [0] 로그인 정보 조회
+@router.get("/me", summary="로그인 정보(프로필) 조회 API", description="현재 로그인한 사용자의 정보 조회.")
+def read_user_me(
+    current_user: User = Depends(get_current_user)
 ):
     return current_user
 
 
-@router.delete("/me")
-def delete_my_account(
-    current_user: User = Depends(get_current_user),
+# [1] 내 계정 삭제 (회원 탈퇴)
+@router.delete("/me", summary="회원 탈퇴 API", description="현재 로그인한 사용자의 계정을 삭제.")
+def delete_user_me(
     db: Session = Depends(get_db),
-    kakao_access_token: Optional[str] = Header(None, alias="X-Kakao-Access-Token")  # 이거!!
+    current_user: User = Depends(get_current_user)
 ):
-
-    print("🧪 받은 kakao_access_token:", kakao_access_token)  # 여기에 찍히는지 확인
-    try:
-        unlink_kakao_user(kakao_access_token)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"카카오 unlink 실패: {e}")
-
-    account = db.query(Account).filter(Account.account_id == current_user.account_id).first()
-
     db.delete(current_user)
-    if account:
-        db.delete(account)
     db.commit()
+    return {"message": "회원 탈퇴가 완료되었습니다."}
 
-    return {"message": "회원탈퇴 완료"}
 
-
-# [1] 닉네임 수정
-@router.patch("/nickname", summary="닉네임 수정")
-def update_nickname(
-        body: NicknameUpdate,
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+# [2] 내 닉네임 수정
+@router.patch("/me/nickname", summary="닉네임 수정 API", description="현재 로그인한 사용자의 닉네임 수정.")
+def update_user_nickname(
+    body: NicknameUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    current_user.display_name = body.displayName
+    current_user.nickname = body.nickname
     db.commit()
     return {"message": "닉네임이 수정되었습니다."}
 
 
-# [2] 소유 가게 목록 조회
-@router.get("/my", response_model=list[StoreOut], summary="내 소유 가게 목록 조회")
+# [3] 내가 등록한 가게 목록 조회
+@router.get("/me/stores", summary="가게 목록 조회 API", description="현재 로그인한 사용자가 등록한 가게 목록 조회.")
 def get_my_stores(
-        db: Session = Depends(get_db),
-        current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     stores = db.query(Store).filter(Store.owner_id == current_user.user_id).all()
     return stores
