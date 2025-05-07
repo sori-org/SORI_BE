@@ -55,7 +55,7 @@ def get_store_detail(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    store = db.query(Store).filter(Store.store_id == store_id, Store.owner_id == current_user.user_id).first()
+    store = db.query(Store).filter(Store.store_id == store_id, Store.user_id == current_user.user_id).first()
     if not store:
         raise HTTPException(status_code=404, detail="가게를 찾을 수 없습니다.")
     return store
