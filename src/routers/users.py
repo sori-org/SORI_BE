@@ -51,5 +51,5 @@ def get_my_stores(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    stores = db.query(Store).filter(Store.owner_id == current_user.user_id).all()
+    stores = db.query(Store).filter(Store.user_id == current_user.user_id).all()
     return stores
