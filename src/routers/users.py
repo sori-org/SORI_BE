@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 # [0] 로그인 정보 조회
-@router.get("/me", summary="로그인 정보(프로필) 조회 API", description="현재 로그인한 사용자의 정보 조회.")
+@router.get("/me", summary="로그인 정보(프로필) 조회 API", description="현재 로그인한 사용자의 정보 조회.", response_model=UserOut)
 def read_user_me(
     current_user: User = Depends(get_current_user)
 ):
