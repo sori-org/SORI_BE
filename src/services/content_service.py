@@ -39,7 +39,7 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
         get_weather_data, get_event_data, get_review_data
     )
 
-    # 외부 정보 프롬프트용 문자열 구성
+    print("🔍 Step 1: 외부 데이터 수집 시작")
     extra_info = []
     if "weather" in data.external_sources:
         extra_info.append(get_weather_data("Seoul"))
@@ -49,8 +49,12 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
         extra_info.append(get_review_data(data.promotion_name))
 
     external_context = "\n".join(extra_info)
+    print("🔍 Step 2: external_context =", external_context)
 
     try:
+        print("🔍 Step 3: Content 객체 생성 시작")
+        print("🧪 external_data_id:", EXTERNAL_DATA_MAP.get(data.external_sources[0]) if data.external_sources else None)
+
         content = Content(
             user_id=user_id,
             platform_id=PLATFORM_MAP.get(data.sns_platform),
@@ -61,12 +65,18 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
             external_data_id=EXTERNAL_DATA_MAP.get(data.external_sources[0]) if data.external_sources else None,
             request_text=data.promotion_name
         )
+
+        print("🔍 Step 4: DB 저장 시도")
         db.add(content)
         db.commit()
         db.refresh(content)
+        print("✅ DB 저장 완료")
+
     except Exception as e:
         db.rollback()
+        print(f"🔥 DB 저장 실패: {e}")
         raise HTTPException(status_code=500, detail=f"DB 저장 실패: {str(e)}")
+
 
     # 홍보 문구 생성
     content.result_text = gpt_generate_text(

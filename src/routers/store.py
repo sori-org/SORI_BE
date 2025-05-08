@@ -18,7 +18,7 @@ def get_db():
 @router.post("/", response_model=schemas.store.StoreOut)
 def create_store(store: schemas.store.StoreCreate, db: Session = Depends(get_db)):
     try:
-        user = db.query(models.user.User).filter(models.user.User.id == store.owner_id).first()
+        user = db.query(models.user.User).filter(models.user.User.id == store.user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
 
