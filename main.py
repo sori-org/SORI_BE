@@ -2,12 +2,15 @@ from fastapi import FastAPI, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from src.db.database import Base, engine
-from src.routers import (kakao_login, users, jwt_token, refresh)
+from src.routers import (kakao_login, users, jwt_token, refresh, content)
 from fastapi.middleware.cors import CORSMiddleware
 from src.api import store, search
 from fastapi.openapi.utils import get_openapi
 
 import logging, os
+
+
+
 
 # UTF8 Response 설정
 class UTF8JSONResponse(JSONResponse):
@@ -45,6 +48,7 @@ app.include_router(jwt_token.router)
 app.include_router(refresh.router)
 app.include_router(store.router)
 app.include_router(search.router)
+app.include_router(content.router)
 
 
 def custom_openapi():

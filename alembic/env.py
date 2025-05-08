@@ -27,6 +27,7 @@ from src.models.platforms import Platform
 from src.models.formats import Format
 from src.models.external_data import ExternalData
 
+
 # ✅ 4. Alembic configuration
 config = context.config
 config.set_main_option("sqlalchemy.url", database_url)
