@@ -24,3 +24,5 @@ def get_db():
         yield db
     finally:
         db.close()
+
+from src.models import external_data, contents, stores, users
