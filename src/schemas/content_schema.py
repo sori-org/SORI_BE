@@ -29,7 +29,7 @@ class ContentImageResponse(BaseModel):
 
 # 최종 결과 조회
 class ContentResult(BaseModel):
-    content_id: str
+    content_id: int
     text: str
     hashtags: List[str]
-    image_url: str
+    image_url: Optional[str] = None

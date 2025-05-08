@@ -5,13 +5,15 @@ from src.models.contents import Content
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 import os
-import openai
 from dotenv import load_dotenv
+from openai import OpenAI  # 최신 방식으로 변경
 
 # .env 불러오기
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-openai.api_key = OPENAI_API_KEY
+
+# 최신 OpenAI 클라이언트 객체 생성
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # 매핑 테이블
 PLATFORM_MAP = {"instagram": 1, "facebook": 2, "naver_blog": 3}
@@ -21,15 +23,15 @@ AGE_MAP = {"10-20": 1, "20-30": 2, "30-40": 3, "40-50": 4}
 EXTERNAL_DATA_MAP = {"weather": 1, "review": 2, "event": 3, "trend": 4}
 
 
-# GPT 문구 생성 함수
+# GPT 문구 생성 함수 (최신 방식)
 def gpt_generate_text(prompt: str) -> str:
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}]
         )
         return response.choices[0].message.content.strip()
-    except openai.error.OpenAIError as e:
+    except Exception as e:
         raise HTTPException(status_code=500, detail=f"GPT 호출 실패: {str(e)}")
 
 
