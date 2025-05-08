@@ -33,3 +33,8 @@ class ContentResult(BaseModel):
     text: str
     hashtags: List[str]
     image_url: Optional[str] = None
+
+
+class ContentCreationResponse(BaseModel):
+    content_id: int
+    message: str

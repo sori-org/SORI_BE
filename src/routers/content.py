@@ -19,7 +19,10 @@ def store_content_input(
     current_user: User = Depends(get_current_user)
 ):
     content_id = save_content_and_generate(db, current_user.user_id, payload)
-    return {"content_id": content_id}
+    return {
+        "content_id": content_id,
+        "message": "콘텐츠 생성 완료. content_id를 사용해서 생성된 콘텐츠 조회하기!"
+    }
 
 # [1] 최종 결과 조회
 @router.get("/result/{content_id}", response_model=ContentResult, summary="최종 결과 조회 API")
