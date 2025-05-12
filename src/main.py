@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from .db.database import Base, engine
-from .routers import kakao_login, users, jwt_token, refresh
+from .routers import kakao_login, users, jwt_token, refresh, contents
 from fastapi.middleware.cors import CORSMiddleware
 from src.api import store, search
 from fastapi.openapi.utils import get_openapi
@@ -40,13 +40,14 @@ app.add_middleware(
 )
 
 # 라우터 등록
+
 app.include_router(kakao_login.router)
 app.include_router(users.router)
 app.include_router(jwt_token.router)
 app.include_router(refresh.router)
 app.include_router(store.router)
 app.include_router(search.router)
-
+app.include_router(contents.router)
 
 def custom_openapi():
     if app.openapi_schema:
