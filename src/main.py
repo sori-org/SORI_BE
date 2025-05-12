@@ -31,7 +31,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://29be-210-178-112-177.ngrok-free.app"
+        "http://localhost:8000",
+        "http://ec2-44-208-199-212.compute-1.amazonaws.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -39,13 +40,14 @@ app.add_middleware(
 )
 
 # 라우터 등록
-app.include_router(kakao_login.router, prefix="/api")
-app.include_router(users.router, prefix="/api")
-app.include_router(jwt_token.router, prefix="/api")
-app.include_router(refresh.router, prefix="/api")
-app.include_router(store.router, prefix="/stores")
-app.include_router(search.router, prefix="/search")
-app.include_router(contents.router, prefix="/api/contents")
+
+app.include_router(kakao_login.router)
+app.include_router(users.router)
+app.include_router(jwt_token.router)
+app.include_router(refresh.router)
+app.include_router(store.router)
+app.include_router(search.router)
+app.include_router(contents.router)
 
 def custom_openapi():
     if app.openapi_schema:
