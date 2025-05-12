@@ -1,6 +1,5 @@
 from langchain.prompts import PromptTemplate
-from langchain.llms import OpenAI
-from langchain.chains import LLMChain
+from langchain_openai import ChatOpenAI
 from src.models.contents import Content
 from src.models.platforms import Platform
 from src.models.formats import Format
@@ -8,89 +7,196 @@ from src.models.items import Item
 from src.models.ages import Age
 from src.models.genders import Gender
 from src.models.external_data import ExternalData
+from src.models.users import User
+from src.models.stores import Store
 from sqlalchemy.orm import Session
+from src.services.external_api import get_external_data
+import base64
 import requests
 import os
 
 api_key = os.getenv("OPENAI_API_KEY")
+MAX_PROMPT_LENGTH = 4000
 
-# ---- Helper: 텍스트 조회 ----
+def load_system_message(filepath: str) -> str:
+    with open(filepath, "r", encoding="utf-8") as file:
+        return file.read()
+
+def get_store_info(db, user_id):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user or not user.main_store_id:
+        return None, None
+    store = db.query(Store).filter(Store.store_id == user.main_store_id).first()
+    if not store:
+        return None, None
+    return store.store_name, store.store_address
+
 def get_text_by_id(db: Session, model, id_field, id_value, text_field="name") -> str:
     if id_value is None:
         return ""
     row = db.query(model).filter(id_field == id_value).first()
     return getattr(row, text_field) if row else ""
 
-# ---- LangChain Assistant 정의 ----
-def build_chain(template: str) -> LLMChain:
-    prompt = PromptTemplate(input_variables=["input"], template=template)
-    llm = OpenAI(model="gpt-4o", temperature=0.7)
-    return LLMChain(llm=llm, prompt=prompt)
+def describe_user_image(content: Content) -> str:
+    if not content.user_image_url:
+        return ""
 
-# 각 요소별 템플릿
-platform_template = """플랫폼 {input}에서 가장 효과적인 마케팅 이미지 스타일은 무엇인가요? 색상, 분위기, 레이아웃 측면에서 설명해줘."""
-item_template = """상품 '{input}'을(를) 가장 잘 표현할 수 있는 이미지 스타일을 설명해줘."""
-age_gender_template = """{input}를 타겟으로 하는 마케팅 이미지 스타일을 제안해줘. 배경, 인물, 표정 등을 포함해서."""
-external_template = """외부 데이터 내용: {input}. 이를 시각적으로 표현하려면 어떤 이미지 요소가 좋을까?"""
-user_prompt_template = """유저 요청: {input}. 이를 바탕으로 시각적 이미지 아이디어를 구체화해줘."""
+    image_path = content.user_image_url
+    if image_path.startswith("/static/"):
+        image_path = image_path.replace("/static/", "uploaded_images/")
 
-# 체인 구성
-platform_chain = build_chain(platform_template)
-item_chain = build_chain(item_template)
-age_gender_chain = build_chain(age_gender_template)
-external_chain = build_chain(external_template)
-user_prompt_chain = build_chain(user_prompt_template)
+    if not os.path.exists(image_path):
+        return ""
 
-# ---- 이미지 생성 함수 ----
+    with open(image_path, "rb") as f:
+        image_bytes = f.read()
+
+    # base64 인코딩
+    encoded_image = base64.b64encode(image_bytes).decode("utf-8")
+
+    # GPT-4o Vision API 호출 (Text + Image)
+    response = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={
+            "model": "gpt-4o",
+            "messages": [
+                {"role": "system", "content": "당신은 이미지 분석 도우미입니다. 주어진 이미지를 간결하고 마케팅적으로 설명해주세요."},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded_image}"}},
+                        {"type": "text", "text": "이 이미지를 분석해서 마케팅에 쓸 수 있는 간단한 설명을 한국어로 1~2문장으로 요약해줘."}
+                    ]
+                }
+            ],
+            "max_tokens": 200
+        }
+    )
+
+    if response.status_code != 200:
+        print("이미지 분석 실패:", response.text)
+        return ""
+
+    result = response.json()
+    description = result["choices"][0]["message"]["content"].strip()
+    return description
+
+def build_chain():
+    system_message = load_system_message("prompts/image_prompt.txt")
+    template = system_message + """
+
+    플랫폼: {platform}
+    아이템: {item}
+    포맷: {format}
+    연령대: {age}
+    성별: {gender}
+    외부 데이터: {external}
+    유저 요청: {user_request}
+
+    위 내용을 참고하여, 반드시 image_prompt.txt에서 제시된 포맷과 룰을 적용해 **최종 DALL·E 프롬프트만** 작성해주세요.
+    설명이나 지침은 넣지 말고, 결과 프롬프트만 주세요.
+    """
+    prompt = PromptTemplate(
+        input_variables=["platform", "item", "format", "age", "gender", "external", "user_request"],
+        template=template
+    )
+    llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
+    return prompt, llm
+
 def generate_marketing_image(content: Content, db: Session) -> str:
-    # ID → 텍스트 변환
-    platform_name = get_text_by_id(db, Platform, Platform.platform_id, content.platform_id, text_field="platform_name")
-    item_name = get_text_by_id(db, Item, Item.item_id, content.item_id, text_field="item_name")
-    format_name = get_text_by_id(db, Format, Format.format_id, content.format_id, text_field="format_name")
-    age_name = get_text_by_id(db, Age, Age.age_id, content.age_id, text_field="age_category")
-    gender_name = get_text_by_id(db, Gender, Gender.gender_id, content.gender_id, text_field="gender_category")
-    external_data_name = get_text_by_id(db, ExternalData, ExternalData.external_data_id, content.external_data_id,
-                                        text_field="external_data_name")
-    # 각 어시스턴트에게 개별 설명 받아오기
-    fragments = {
-        "platform_desc": platform_chain.run(platform_name),
-        "item_desc": item_chain.run(item_name),
-        "format_desc": item_chain.run(format_name),
-        "age_desc": age_gender_chain.run(age_name),
-        "gender_desc": age_gender_chain.run(gender_name),
-        "external_desc": external_chain.run(external_data_name),
-        "user_prompt_desc": user_prompt_chain.run(content.request_text)
-    }
+    store_name, store_address = get_store_info(db, content.user_id)
+    if not store_name or not store_address:
+        raise Exception("대표 가게 정보가 없습니다.")
 
-    # 프롬프트 통합
-    final_prompt = f"""
-아래 요소들을 반영한 마케팅 콘텐츠 이미지를 묘사해줘:
+    platform_name = get_text_by_id(db, Platform, Platform.platform_id, content.platform_id, "platform_name")
+    item_name = get_text_by_id(db, Item, Item.item_id, content.item_id, "item_name")
+    format_name = get_text_by_id(db, Format, Format.format_id, content.format_id, "format_name")
+    age_name = get_text_by_id(db, Age, Age.age_id, content.age_id, "age_category")
+    gender_name = get_text_by_id(db, Gender, Gender.gender_id, content.gender_id, "gender_category")
+    external_data_name = get_text_by_id(db, ExternalData, ExternalData.external_data_id, content.external_data_id, "external_data_name")
 
-1. 플랫폼 최적화 설명: {fragments['platform_desc']}
-2. 상품 특징: {fragments['item_desc']}
-3. 타겟 설명 (연령/성별): {fragments['age_gender_desc']}
-4. 외부 데이터 강조점: {fragments['external_desc']}
-5. 유저 요청사항 해석: {fragments['user_prompt_desc']}
+    for name, value in [("platform", platform_name), ("item", item_name), ("format", format_name),
+                        ("age", age_name), ("gender", gender_name), ("external", external_data_name)]:
+        if not value:
+            raise Exception(f"{name} 값이 비어 있습니다. DB를 확인해주세요.")
 
-이 요소를 모두 반영해 DALL·E 스타일의 텍스트 프롬프트를 완성해줘.
-"""
+    external_data_text = get_external_data(external_data_name, store_address, store_name)
 
-    # 이미지 생성 (OpenAI API 호출)
+    user_image_description = describe_user_image(content)
+    if user_image_description:
+        external_data_text += f"\n유저 제공 이미지: {user_image_description}"
+
+    print("\n=== 선택된 카테고리 정보 ===")
+    print(f"Platform: {platform_name}")
+    print(f"Item: {item_name}")
+    print(f"Format: {format_name}")
+    print(f"Age: {age_name}")
+    print(f"Gender: {gender_name}")
+    print(f"External: {external_data_text}")
+    print(f"User Request: {content.request_text}")
+    print("===========================\n")
+
+    prompt, llm = build_chain()
+    formatted_prompt = prompt.format(
+        platform=platform_name,
+        item=item_name,
+        format=format_name,
+        age=age_name,
+        gender=gender_name,
+        external=external_data_text,
+        user_request=content.request_text
+    )
+    result = llm.invoke(formatted_prompt)
+    final_prompt = result.content.strip()
+
+    if len(final_prompt) > MAX_PROMPT_LENGTH:
+        final_prompt = final_prompt[:MAX_PROMPT_LENGTH]
+
+    print("\n=== 최종 GPT 이미지 프롬프트 ===")
+    print(final_prompt)
+    print("================================\n")
+
     dalle_res = requests.post(
         "https://api.openai.com/v1/images/generations",
         headers={"Authorization": f"Bearer {api_key}"},
         json={
-            "model": "dall-e-3",
+            "model": "gpt-image-1",
             "prompt": final_prompt,
             "n": 1,
-            "size": "1024x1024"
+            "size": "1024x1024",
+            "quality": "medium"
         }
     )
-    image_url = dalle_res.json()["data"][0]["url"]
 
-    # DB 업데이트 (선택적)
+    if dalle_res.status_code != 200:
+        raise Exception(f"GPT Image 1 API 호출 실패: {dalle_res.status_code}, {dalle_res.text}")
+
+    response_json = dalle_res.json()
+    if "data" not in response_json or not response_json["data"]:
+        raise Exception("GPT Image 1 응답에 이미지 데이터 없음")
+
+    image_data = response_json["data"][0]
+    filename = f"generated_images/content_{content.content_id}.png"
+    dir_path = os.path.dirname(filename)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
+
+    if "url" in image_data:
+        # URL 방식 (거의 안 나옴, fallback용)
+        image_url = image_data["url"]
+        image_bytes = requests.get(image_url).content
+        with open(filename, 'wb') as f:
+            f.write(image_bytes)
+    elif "b64_json" in image_data:
+        # Base64 이미지 처리
+        image_bytes = base64.b64decode(image_data["b64_json"])
+        with open(filename, 'wb') as f:
+            f.write(image_bytes)
+        image_url = filename
+    else:
+        raise Exception("GPT Image 1 응답 형식이 예상과 다릅니다")
+
     content.image_url = image_url
-    content.result_text = final_prompt
     db.commit()
-
     return image_url
