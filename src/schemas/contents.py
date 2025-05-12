@@ -20,7 +20,6 @@ from pydantic import BaseModel
 from typing import Optional
 
 class ContentCreate(BaseModel):
-    user_id: int
     platform_id: int
     format_id: Optional[int]
     item_id: Optional[int]

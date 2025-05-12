@@ -1,25 +1,12 @@
 import requests
 import os
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import date
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# 주소에서 도시 조회(날씨)
-def get_city_from_address(address: str) -> str:
-    api_key = os.getenv("GOOGLE_MAP_API_KEY")
-    url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={api_key}"
 
-    response = requests.get(url)
-    data = response.json()
-
-    if response.status_code == 200 and data['results']:
-        # 주소 컴포넌트에서 "locality" 필드(도시명) 찾기
-        for component in data['results'][0]['address_components']:
-            if "locality" in component["types"]:
-                return component["long_name"]
-    return None
 
 #주소에서 좌표 조회(행사)
 def get_coordinates_from_address(address: str) -> tuple:
@@ -61,19 +48,28 @@ else:
 
 
 # 날씨 정보 가져오기 (OpenWeatherMap API)
-def get_weather_data(city: str) -> str:
+def get_daily_weather_data_from_address(address: str, target_date: date = date.today()) -> str:
     api_key = os.getenv("OPENWEATHERMAP_API_KEY")
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=kr"
+    lat, lon = get_coordinates_from_address(address)
+
+    if not lat or not lon:
+        return "위도와 경도를 가져올 수 없습니다."
+
+    date_str = target_date.strftime("%Y-%m-%d")
+    url = f"https://api.openweathermap.org/data/3.0/onecall/overview?lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=kr"
+
     response = requests.get(url)
-    data = response.json()
-
     if response.status_code == 200:
-        temperature = data['main']['temp']
-        description = data['weather'][0]['description']
-        return f"현재 {city}의 날씨는 {description}이고, 기온은 {temperature}°C입니다."
-    else:
-        return "날씨 정보를 가져오는데 실패했습니다."
+        try:
+            data = response.json()
+            overview = data.get("weather_overview", "")
+            return f"{target_date.strftime('%Y-%m-%d')} 날씨 요약: {overview}"
 
+        except KeyError as e:
+            print("파싱 오류:", e)
+            return "기온 또는 요약 정보가 존재하지 않습니다."
+    else:
+        return f"날씨 API 요청 실패 (상태코드: {response.status_code})"
 #점포 위치 기반으로 주변 2km 내 행사 조회
 def get_tour_events_by_location(lat: float, lng: float):
     service_key = os.getenv("TOUR_API_KEY")
@@ -276,12 +272,7 @@ def get_trending_data():
 # 외부 데이터에 맞는 함수 호출
 def get_external_data(external_data_name: str, address: str, name: str) -> str:
     if external_data_name == "weather":
-        city = get_city_from_address(address)
-        if city:
-            return get_weather_data(city)
-        else:
-            return "도시명을 찾을 수 없습니다."
-
+        return get_daily_weather_data_from_address(address, date.today())
     elif external_data_name == "event":
         lat, lng = get_coordinates_from_address(address)
         return get_tour_events_by_location(lat, lng)

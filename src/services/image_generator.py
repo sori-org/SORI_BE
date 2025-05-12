@@ -1,6 +1,5 @@
 from langchain.prompts import PromptTemplate
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import LLMChain
+from langchain_openai import ChatOpenAI
 from src.models.contents import Content
 from src.models.platforms import Platform
 from src.models.formats import Format
@@ -11,21 +10,17 @@ from src.models.external_data import ExternalData
 from src.models.users import User
 from src.models.stores import Store
 from sqlalchemy.orm import Session
+from src.services.external_api import get_external_data
+import base64
 import requests
 import os
 
 api_key = os.getenv("OPENAI_API_KEY")
 MAX_PROMPT_LENGTH = 4000
 
-def download_image(image_url, filename):
-    response = requests.get(image_url)
-    if response.status_code == 200:
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
-        with open(filename, 'wb') as f:
-            f.write(response.content)
-        print(f"이미지 저장 완료: {filename}")
-    else:
-        print(f"이미지 다운로드 실패: {response.status_code}")
+def load_system_message(filepath: str) -> str:
+    with open(filepath, "r", encoding="utf-8") as file:
+        return file.read()
 
 def get_store_info(db, user_id):
     user = db.query(User).filter(User.user_id == user_id).first()
@@ -42,36 +37,28 @@ def get_text_by_id(db: Session, model, id_field, id_value, text_field="name") ->
     row = db.query(model).filter(id_field == id_value).first()
     return getattr(row, text_field) if row else ""
 
-# ---- LangChain 통합 Assistant ----
-def build_chain() -> LLMChain:
-    template = """
-다음 조건을 반영하여 마케팅 콘텐츠용 DALL·E 이미지 프롬프트를 작성해줘.
+def build_chain():
+    system_message = load_system_message("prompts/image_prompt.txt")
+    template = system_message + """
 
-플랫폼: {platform}
-아이템: {item}
-포맷: {format}
-연령대: {age}
-성별: {gender}
-외부 데이터: {external}
-유저 요청: {user_request}
+    플랫폼: {platform}
+    아이템: {item}
+    포맷: {format}
+    연령대: {age}
+    성별: {gender}
+    외부 데이터: {external}
+    유저 요청: {user_request}
 
-위 항목들을 모두 고려하여,
-1️⃣ 플랫폼 최적화 설명
-2️⃣ 상품 특징 강조
-3️⃣ 연령대 및 성별에 맞는 스타일
-4️⃣ 외부 데이터 연결 (예: 날씨, 리뷰, 행사, 트렌드)
-5️⃣ 유저 요청 반영
-
-이 항목들을 조화롭게 반영한 **DALL·E용 프롬프트**를 만들어줘.
-"""
+    위 내용을 참고하여, 반드시 image_prompt.txt에서 제시된 포맷과 룰을 적용해 **최종 DALL·E 프롬프트만** 작성해주세요.
+    설명이나 지침은 넣지 말고, 결과 프롬프트만 주세요.
+    """
     prompt = PromptTemplate(
         input_variables=["platform", "item", "format", "age", "gender", "external", "user_request"],
         template=template
     )
     llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
-    return LLMChain(llm=llm, prompt=prompt)
+    return prompt, llm
 
-# ---- 이미지 생성 함수 ----
 def generate_marketing_image(content: Content, db: Session) -> str:
     store_name, store_address = get_store_info(db, content.user_id)
     if not store_name or not store_address:
@@ -84,55 +71,83 @@ def generate_marketing_image(content: Content, db: Session) -> str:
     gender_name = get_text_by_id(db, Gender, Gender.gender_id, content.gender_id, "gender_category")
     external_data_name = get_text_by_id(db, ExternalData, ExternalData.external_data_id, content.external_data_id, "external_data_name")
 
-    print("platform_name:", platform_name)
-    print("item_name:", item_name)
-    print("format_name:", format_name)
-    print("age_name:", age_name)
-    print("gender_name:", gender_name)
-    print("external_data_name:", external_data_name)
-    print("user_request_text:", content.request_text)
+    for name, value in [("platform", platform_name), ("item", item_name), ("format", format_name),
+                        ("age", age_name), ("gender", gender_name), ("external", external_data_name)]:
+        if not value:
+            raise Exception(f"{name} 값이 비어 있습니다. DB를 확인해주세요.")
 
-    unified_chain = build_chain()
-    final_prompt = unified_chain.run({
-        "platform": platform_name,
-        "item": item_name,
-        "format": format_name,
-        "age": age_name,
-        "gender": gender_name,
-        "external": external_data_name,
-        "user_request": content.request_text
-    })
+    external_data_text = get_external_data(external_data_name, store_address, store_name)
+
+    print("\n=== 선택된 카테고리 정보 ===")
+    print(f"Platform: {platform_name}")
+    print(f"Item: {item_name}")
+    print(f"Format: {format_name}")
+    print(f"Age: {age_name}")
+    print(f"Gender: {gender_name}")
+    print(f"External: {external_data_text}")
+    print(f"User Request: {content.request_text}")
+    print("===========================\n")
+
+    prompt, llm = build_chain()
+    formatted_prompt = prompt.format(
+        platform=platform_name,
+        item=item_name,
+        format=format_name,
+        age=age_name,
+        gender=gender_name,
+        external=external_data_text,
+        user_request=content.request_text
+    )
+    result = llm.invoke(formatted_prompt)
+    final_prompt = result.content.strip()
 
     if len(final_prompt) > MAX_PROMPT_LENGTH:
         final_prompt = final_prompt[:MAX_PROMPT_LENGTH]
 
-    print("\n===== 최종 DALL·E 프롬프트 =====\n")
+    print("\n=== 최종 GPT 이미지 프롬프트 ===")
     print(final_prompt)
-    print("\n===== 프롬프트 끝 =====\n")
+    print("================================\n")
 
     dalle_res = requests.post(
         "https://api.openai.com/v1/images/generations",
         headers={"Authorization": f"Bearer {api_key}"},
         json={
-            "model": "dall-e-3",
+            "model": "gpt-image-1",
             "prompt": final_prompt,
             "n": 1,
-            "size": "1024x1024"
+            "size": "1024x1024",
+            "quality": "medium"
         }
     )
 
     if dalle_res.status_code != 200:
-        raise Exception(f"DALL·E API 호출 실패: {dalle_res.status_code}, {dalle_res.text}")
+        raise Exception(f"GPT Image 1 API 호출 실패: {dalle_res.status_code}, {dalle_res.text}")
 
     response_json = dalle_res.json()
     if "data" not in response_json or not response_json["data"]:
-        raise Exception(f"DALL·E API 응답에 이미지 데이터 없음: {response_json}")
+        raise Exception("GPT Image 1 응답에 이미지 데이터 없음")
 
-    image_url = response_json["data"][0]["url"]
+    image_data = response_json["data"][0]
     filename = f"generated_images/content_{content.content_id}.png"
-    download_image(image_url, filename)
+    dir_path = os.path.dirname(filename)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
+
+    if "url" in image_data:
+        # URL 방식 (거의 안 나옴, fallback용)
+        image_url = image_data["url"]
+        image_bytes = requests.get(image_url).content
+        with open(filename, 'wb') as f:
+            f.write(image_bytes)
+    elif "b64_json" in image_data:
+        # Base64 이미지 처리
+        image_bytes = base64.b64decode(image_data["b64_json"])
+        with open(filename, 'wb') as f:
+            f.write(image_bytes)
+        image_url = filename
+    else:
+        raise Exception("GPT Image 1 응답 형식이 예상과 다릅니다")
 
     content.image_url = image_url
     db.commit()
-
     return image_url
