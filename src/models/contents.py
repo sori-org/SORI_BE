@@ -20,4 +20,5 @@ class Content(Base):
     result_text = Column(String(2000), nullable=True)
     result_hashtag = Column(String(100), nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
+    status = Column(String, default="pending")
     store_id = Column(BigInteger, ForeignKey("stores.store_id"), nullable=True)
