@@ -1,4 +1,7 @@
 from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime
+
 
 class ContentBase(BaseModel):
     content_id: int
