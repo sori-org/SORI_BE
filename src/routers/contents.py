@@ -31,21 +31,25 @@ def create_content(
     }
 
 @router.post("/contents/{content_id}/generate-image")
-def generate_image(content_id: int, db: Session = Depends(get_db)):
-    """
-    별도 API로 이미지 생성 실행.
-    """
+def generate_image(
+    content_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)  # ✅ 인증 적용
+):
     content = db.query(Content).filter(Content.content_id == content_id).first()
     if not content:
         raise HTTPException(status_code=404, detail="Content not found")
 
-    # 이미지 생성 실행
+    if content.user_id != current_user.user_id:
+        raise HTTPException(status_code=403, detail="해당 콘텐츠에 대한 권한이 없습니다.")
+
     image_url = generate_marketing_image(content, db)
 
     return {
         "content_id": content.content_id,
         "image_url": image_url,
     }
+
 # 📌 업데이트용 pydantic 모델
 class FieldUpdate(BaseModel):
     value: int
@@ -97,31 +101,33 @@ def upload_user_image(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # 콘텐츠 확인
     content = db.query(Content).filter(Content.content_id == content_id).first()
     if not content:
         raise HTTPException(status_code=404, detail="Content not found")
 
-    # 사용자별 디렉토리 구성
-    user_dir = os.path.join("uploaded_images", f"user_{current_user.user_id}")
-    os.makedirs(user_dir, exist_ok=True)
+    # 콘텐츠별 디렉토리 생성 (예: uploaded_images/content_17/)
+    content_dir = os.path.join("uploaded_images", f"content_{content_id}")
+    os.makedirs(content_dir, exist_ok=True)
 
-    # 파일 저장
+    # 확장자 보존 + 고유 이름 지정
     ext = os.path.splitext(file.filename)[1]
     unique_filename = f"{uuid4().hex}{ext}"
-    file_path = os.path.join(user_dir, unique_filename)
+    file_path = os.path.join(content_dir, unique_filename)
 
+    # 파일 저장
     with open(file_path, "wb") as f:
         f.write(file.file.read())
 
-    # 접근 가능한 URL 구성 (static mount 기준)
-    image_url = f"/static/user_{current_user.user_id}/{unique_filename}"
+    # static 경로 기준 URL 저장 (예: /static/content_17/파일명)
+    image_url = f"/static/content_{content_id}/{unique_filename}"
 
-    # ✅ 업로드된 이미지 URL을 user_image_url에 저장
+    # DB에 기록
     content.user_image_url = image_url
     db.commit()
 
     return {
-        "message": "사용자 이미지 업로드 완료",
+        "message": "콘텐츠 이미지 업로드 완료",
         "user_image_url": image_url
     }
 

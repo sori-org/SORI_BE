@@ -38,15 +38,6 @@ def get_place_id_from_address(address: str) -> str:
         return data['candidates'][0]['place_id']
     return None
 
-
-address = "경기도 성남시 수정구 복정로 18 1층"
-latitude, longitude = get_coordinates_from_address(address)
-if latitude and longitude:
-    print(f"위도: {latitude}, 경도: {longitude}")
-else:
-    print("위도와 경도를 가져올 수 없습니다.")
-
-
 # 날씨 정보 가져오기 (OpenWeatherMap API)
 def get_daily_weather_data_from_address(address: str, target_date: date = date.today()) -> str:
     api_key = os.getenv("OPENWEATHERMAP_API_KEY")
@@ -187,20 +178,14 @@ def get_google_reviews(store_name, store_address):
             return filtered_reviews
     return []
 
-store_name = "겐코쇼쿠도 복정점"
-store_address = "경기도 성남시 수정구 복정로 18"
-
-reviews = get_google_reviews(store_name, store_address)
-
-if reviews:
-    print("⭐ 4점, 5점 리뷰:")
-    for r in reviews:
-        author = r['author']
-        rating = r['rating']
-        text = r['text']
-        print(f"- {author} ({rating}점): {text}")
-else:
-    print("리뷰가 없거나 가져오기 실패했습니다.")
+def summarize_reviews(reviews: list[dict]) -> str:
+    if not reviews:
+        return "리뷰 정보 없음"
+    summary_lines = []
+    for review in reviews[:3]:  # 최대 3개까지만 출력
+        line = f"- {review.get('text', '').strip()} (별점: {review.get('rating', '')})"
+        summary_lines.append(line)
+    return "\n".join(summary_lines)
 
 # 유행 정보 가져오기 (Google Trends / Naver Search API)
 def get_trending_data():
@@ -277,7 +262,8 @@ def get_external_data(external_data_name: str, address: str, name: str) -> str:
         lat, lng = get_coordinates_from_address(address)
         return get_tour_events_by_location(lat, lng)
     elif external_data_name == "review":
-        return get_google_reviews(name, address)
+        reviews = get_google_reviews(name, address)
+        return summarize_reviews(reviews)
     elif external_data_name == "trend":
         return get_trending_data()
     else:

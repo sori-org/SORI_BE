@@ -68,11 +68,12 @@ The characters should be cute, round, and simple, resembling animal-like figures
 
 Art Style:
 Without modifying the image provided by the user, generate and overlay Korean subtitles.
-The subtitles should be short and concise promotional text based on the input condition given by the user.
+The subtitles must be short(20자 이내) and concise promotional text based on the input condition given by the user.
+The subtitles must be white text with black outline.
 
 2. **AI Image Prompt** (if post_cover+text)
 
 Art Style:
 Create an original image and subtitles.
 The subtitles should be short and concise promotional text based on the input condition given by the user.
-The image is not realistic but
+The image must be decorated, emphasized, exaggerated.

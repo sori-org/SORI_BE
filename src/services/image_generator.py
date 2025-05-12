@@ -37,6 +37,51 @@ def get_text_by_id(db: Session, model, id_field, id_value, text_field="name") ->
     row = db.query(model).filter(id_field == id_value).first()
     return getattr(row, text_field) if row else ""
 
+def describe_user_image(content: Content) -> str:
+    if not content.user_image_url:
+        return ""
+
+    image_path = content.user_image_url
+    if image_path.startswith("/static/"):
+        image_path = image_path.replace("/static/", "uploaded_images/")
+
+    if not os.path.exists(image_path):
+        return ""
+
+    with open(image_path, "rb") as f:
+        image_bytes = f.read()
+
+    # base64 인코딩
+    encoded_image = base64.b64encode(image_bytes).decode("utf-8")
+
+    # GPT-4o Vision API 호출 (Text + Image)
+    response = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={
+            "model": "gpt-4o",
+            "messages": [
+                {"role": "system", "content": "당신은 이미지 분석 도우미입니다. 주어진 이미지를 간결하고 마케팅적으로 설명해주세요."},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded_image}"}},
+                        {"type": "text", "text": "이 이미지를 분석해서 마케팅에 쓸 수 있는 간단한 설명을 한국어로 1~2문장으로 요약해줘."}
+                    ]
+                }
+            ],
+            "max_tokens": 200
+        }
+    )
+
+    if response.status_code != 200:
+        print("이미지 분석 실패:", response.text)
+        return ""
+
+    result = response.json()
+    description = result["choices"][0]["message"]["content"].strip()
+    return description
+
 def build_chain():
     system_message = load_system_message("prompts/image_prompt.txt")
     template = system_message + """
@@ -77,6 +122,10 @@ def generate_marketing_image(content: Content, db: Session) -> str:
             raise Exception(f"{name} 값이 비어 있습니다. DB를 확인해주세요.")
 
     external_data_text = get_external_data(external_data_name, store_address, store_name)
+
+    user_image_description = describe_user_image(content)
+    if user_image_description:
+        external_data_text += f"\n유저 제공 이미지: {user_image_description}"
 
     print("\n=== 선택된 카테고리 정보 ===")
     print(f"Platform: {platform_name}")
