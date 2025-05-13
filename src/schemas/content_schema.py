@@ -13,21 +13,26 @@ class ContentInput(BaseModel):
     content_format: str = Field(..., example="image_text")  # image_text, cuttoon, cover_text
     external_sources: Optional[List[str]] = Field(default=[], example=["weather", "review"])
 
+
 # 이미지 업로드 후 응답
 class ContentImageUpload(BaseModel):
     image_url: str
+
 
 # 문구 생성 결과
 class ContentTextResponse(BaseModel):
     text: str
 
+
 # 해시태그 생성 결과
 class ContentHashtagResponse(BaseModel):
     hashtags: List[str]
 
+
 # 이미지 생성 결과
 class ContentImageResponse(BaseModel):
     image_url: str
+
 
 # 최종 결과 조회
 class ContentResult(BaseModel):
@@ -44,12 +49,19 @@ class ContentCreationResponse(BaseModel):
 
 class ContentListResponse(BaseModel):
     content_id: int
-    created_at: datetime
+    created_at: str  # datetime → str
     store_name: Optional[str] = None  # ← store 테이블과 조인 필요
 
     class Config:
-        from_attributes = True  # pydantic v2
+        from_attributes = True
 
+    @classmethod
+    def from_orm(cls, obj):
+        return cls(
+            content_id=obj.content_id,
+            created_at=obj.created_at.strftime("%Y년 %m월 %d일"),
+            store_name=getattr(obj, "store_name", None)
+        )
 
 
 class ContentDetailResponse(BaseModel):
@@ -58,7 +70,18 @@ class ContentDetailResponse(BaseModel):
     result_text: str
     result_hashtag: str
     image_url: Optional[str]
-    created_at: datetime
+    created_at: str  # datetime → str
 
     class Config:
         from_attributes = True
+
+    @classmethod
+    def from_orm(cls, obj):
+        return cls(
+            content_id=obj.content_id,
+            platform_id=obj.platform_id,
+            result_text=obj.result_text,
+            result_hashtag=obj.result_hashtag,
+            image_url=obj.image_url,
+            created_at=obj.created_at.strftime("%Y년 %m월 %d일")
+        )

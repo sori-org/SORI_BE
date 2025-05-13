@@ -11,7 +11,7 @@ from src.models.stores import Store
 
 router = APIRouter(
     prefix="/api/users",
-    tags=["Users"]
+    tags=["마이페이지"]
 )
 
 # [0] 로그인 정보 조회

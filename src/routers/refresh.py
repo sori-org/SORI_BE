@@ -8,7 +8,7 @@ import os
 
 router = APIRouter(
     prefix="/api/auth",
-    tags=["Authentication"]
+    tags=["로그인"]
 )
 
 

@@ -16,11 +16,11 @@ import os
 
 router = APIRouter(
     prefix="/api/content",
-    tags=["Content Generation & Records"]
+    tags=["콘텐츠 생성 & 기록보기"]
 )
 
 # [0] 사용자 입력 저장 + 내부 생성
-@router.post("/inputs", summary="사용자 입력 저장 및 콘텐츠 생성 API")
+@router.post("/inputs", summary="콘텐츠 생성 (1): 사용자 선택 입력 -> 결과 생성")
 def store_content_input(
     payload: ContentInput,
     db: Session = Depends(get_db),
@@ -33,7 +33,7 @@ def store_content_input(
     }
 
 # [1] 최종 결과 조회
-@router.get("/result/{content_id}", response_model=ContentResult, summary="최종 결과 조회 API")
+@router.get("/result/{content_id}", response_model=ContentResult, summary="콘텐츠 생성 (2): content_id 입력 -> 이미지, 홍보문구, 해시태그 반환")
 def get_final_content(content_id: int, db: Session = Depends(get_db)):
     content = get_content_result(db, content_id)
     if not content:
@@ -46,7 +46,7 @@ def get_final_content(content_id: int, db: Session = Depends(get_db)):
     )
 
 # [2] 콘텐츠 기록 보기
-@router.get("/", response_model=list[ContentListResponse], summary="콘텐츠 기록 보기: 가게명&생성일")
+@router.get("/", response_model=list[ContentListResponse], summary="콘텐츠 기록 보기(최신순/오래된순): 가게명&생성일")
 def get_content_list(
     sort_by: Literal["latest", "oldest"] = Query("latest"),
     db: Session = Depends(get_db),
@@ -64,10 +64,11 @@ def get_content_list(
     else:
         query = query.order_by(Content.created_at.asc())
 
-    return query.all()
+    results = query.all()
+    return [ContentListResponse.from_orm(r) for r in results]
 
 # [3] 기록 보기: 상세
-@router.get("/{content_id}", response_model=ContentDetailResponse, summary = "기록 보기: 상세")
+@router.get("/{content_id}", response_model=ContentDetailResponse, summary = "기록 보기 상세: content_id 입력 -> 이미지, 홍보문구, 해시태그 반환")
 def get_content_detail(
     content_id: int,
     db: Session = Depends(get_db),
@@ -81,7 +82,8 @@ def get_content_detail(
     if not content:
         raise HTTPException(status_code=404, detail="콘텐츠를 찾을 수 없습니다.")
 
-    return content
+    return ContentDetailResponse.from_orm(content)
+
 
 # [4] 기본 콘텐츠 생성
 @router.post("", summary="기본 콘텐츠 생성")

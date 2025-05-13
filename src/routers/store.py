@@ -4,7 +4,7 @@ from src.db.database import SessionLocal
 from src import models, schemas
 from src.schemas.stores import StoreCreate, StoreOut
 
-router = APIRouter(prefix="/stores", tags=["Stores"])
+router = APIRouter(prefix="/stores", tags=["가게/대표가게 등록 및 조회, 수정, 삭제"])
 
 
 def get_db():
