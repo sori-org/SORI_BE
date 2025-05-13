@@ -9,11 +9,11 @@ from src.db.database import get_db
 
 router = APIRouter(
     prefix="/api/stores",
-    tags=["Stores"]
+    tags=["가게/대표가게 등록 및 조회, 수정, 삭제"]
 )
 
 # [0] 가게 등록
-@router.post("", response_model=StoreResponse, summary="가게 등록 API", description="새로운 가게 등록. 한 명의 user가 동일한 가게를 등록할 경우 에러 반환. 가게 최초 등록시 해당 가게를 대표 가게로 설정.")
+@router.post("", response_model=StoreResponse, summary="가게 등록", description="새로운 가게 등록. 한 명의 user가 동일한 가게를 등록할 경우 에러 반환. 가게 최초 등록시 해당 가게를 대표 가게로 설정.")
 def register_store(
     store: StoreCreate,
     db: Session = Depends(get_db)
@@ -49,7 +49,7 @@ def register_store(
 
 
 # [1] 가게 상세 조회
-@router.get("/{store_id}", response_model=StoreOut, summary="가게 정보 조회 API", description="store_id를 기준으로 특정 가게의 상세 정보를 조회. 가게 정보가 없을 경우 에러 반환.")
+@router.get("/{store_id}", response_model=StoreOut, summary="가게 정보 조회", description="store_id를 기준으로 특정 가게의 상세 정보를 조회. 가게 정보가 없을 경우 에러 반환.")
 def get_store_detail(
     store_id: int,
     db: Session = Depends(get_db),
@@ -62,7 +62,7 @@ def get_store_detail(
 
 
 # [2] 가게 정보 수정
-@router.patch("/{store_id}", summary="가게 정보 수정 API", description="store_id를 기준으로 가게의 정보 수정. 가게 정보가 없을 경우 에러 반환.")
+@router.patch("/{store_id}", summary="가게 정보 수정", description="store_id를 기준으로 가게의 정보 수정. 가게 정보가 없을 경우 에러 반환.")
 def update_store(
     store_id: int,
     body: StoreUpdate,
@@ -82,7 +82,7 @@ def update_store(
 
 
 # [3] 가게 삭제
-@router.delete("/{store_id}", summary="가게 삭제 API", description="store_id를 기준으로 가게 삭제. 가게 정보가 없을 경우 에러 반환.")
+@router.delete("/{store_id}", summary="가게 삭제", description="store_id를 기준으로 가게 삭제. 가게 정보가 없을 경우 에러 반환.")
 def delete_store(
     store_id: int,
     db: Session = Depends(get_db),
@@ -99,7 +99,7 @@ def delete_store(
 
 
 # [4] 대표 가게 설정
-@router.patch("/{store_id}/set-main", summary="대표 가게 설정 API", description="store_id에 해당하는 가게를 대표 가게로 설정. 가게 정보가 없을 경우 에러 반환.")
+@router.patch("/{store_id}/set-main", summary="대표 가게 설정", description="store_id에 해당하는 가게를 대표 가게로 설정. 가게 정보가 없을 경우 에러 반환.")
 def set_default_store(
     store_id: int,
     db: Session = Depends(get_db),

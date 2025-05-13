@@ -4,7 +4,7 @@ from src.services.auth.jwt_handler import create_jwt_token
 
 router = APIRouter(
     prefix="/api/auth",
-    tags=["Authentication"]
+    tags=["로그인"]
 )
 
 class TokenRequest(BaseModel):

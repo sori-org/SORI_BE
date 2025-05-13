@@ -14,7 +14,7 @@ from src.services.auth.refresh_token_handler import save_refresh_token
 
 router = APIRouter(
     prefix="/api/auth/kakao",
-    tags=["Authentication"]
+    tags=["로그인"]
 )
 
 load_dotenv()

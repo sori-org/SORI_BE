@@ -9,6 +9,9 @@ from src.models.stores import Store
 from src.services.external_data_service import (
     get_weather_data, get_event_data, get_review_data
 )
+import re
+
+
 
 # .env 불러오기
 load_dotenv()
@@ -46,7 +49,7 @@ def load_prompt_for_sns(sns_platform: str) -> str:
 def gpt_generate_text(prompt: str) -> str:
     try:
         response = openai.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             messages=[{"role": "user", "content": prompt}]
         )
         return response.choices[0].message.content.strip()
@@ -54,6 +57,14 @@ def gpt_generate_text(prompt: str) -> str:
         raise HTTPException(status_code=500, detail="GPT 응답 파싱 실패")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"GPT 호출 실패: {str(e)}")
+
+
+# GPT 응답에서 문구와 해시태그 분리
+def split_gpt_response(response: str) -> tuple[str, str]:
+    hashtags = re.findall(r"#\S+", response)
+    text_without_hashtags = re.sub(r"#\S+", "", response).strip()
+    return text_without_hashtags.strip(), " ".join(hashtags)
+
 
 # 콘텐츠 생성 및 DB 저장
 def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> int:
@@ -80,7 +91,6 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
             raise HTTPException(status_code=400, detail=f"지원되지 않는 외부 데이터 타입입니다: {key}")
         external_data_id = EXTERNAL_DATA_MAP[key]
 
-    # Content 객체 생성 및 저장
     try:
         content = Content(
             user_id=user_id,
@@ -100,7 +110,7 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
         db.rollback()
         raise HTTPException(status_code=500, detail=f"DB 저장 실패: {str(e)}")
 
-    # 프롬프트 기반 문구 생성
+    # GPT 전체 응답 → 문구 + 해시태그 추출
     base_prompt = load_prompt_for_sns(data.sns_platform)
     full_prompt = f"""{base_prompt}
 
@@ -111,17 +121,11 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
 - 외부 정보:
 {external_context}
 """
-    content.result_text = gpt_generate_text(full_prompt)
+    full_response = gpt_generate_text(full_prompt)
+    result_text, result_hashtag = split_gpt_response(full_response)
 
-    # 해시태그 생성
-    hashtag_prompt = (
-        f"{data.promotion_name}를(을) 홍보하기 위한 해시태그를 5개 추천해줘. "
-        "해시태그 기호 포함하고, 한글로 작성해줘."
-    )
-    hashtags_text = gpt_generate_text(hashtag_prompt)
-    hashtags = hashtags_text.replace("\n", " ").split()
-    hashtags = [tag for tag in hashtags if tag.startswith("#")]
-    content.result_hashtag = " ".join(hashtags)
+    content.result_text = result_text
+    content.result_hashtag = result_hashtag
 
     try:
         db.commit()

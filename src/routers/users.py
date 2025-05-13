@@ -8,7 +8,7 @@ from src.services.auth.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/api/users",
-    tags=["Users"]
+    tags=["마이페이지"]
 )
 
 # [0] 로그인 정보 조회
