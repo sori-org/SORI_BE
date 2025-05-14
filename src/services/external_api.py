@@ -242,4 +242,4 @@ def get_external_data(external_data_name: str, address: str) -> str:
     elif external_data_name == "trend":
         return get_trending_data()
     else:
-        return "외부 데이터 정보를 가져올 수 없습니다."
+        return "외부 데이터가 선택되지 않았습니다."
