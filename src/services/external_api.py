@@ -145,33 +145,6 @@ def get_event_details(content_id: str) -> list:
             print(f"Error parsing XML (event details): {e}")
     return []
 
-#행사 출력 테스트
-events = get_tour_events_by_location(latitude, longitude)
-if events:
-    for event in events:
-        content_id = event["content_id"]
-        start_date_str, end_date_str = get_event_dates(content_id)
-        if start_date_str and end_date_str and start_date_str.strip() and end_date_str.strip():
-            try:
-                start_date = datetime.strptime(start_date_str, "%Y%m%d")
-                end_date = datetime.strptime(end_date_str, "%Y%m%d")
-                today = datetime.today()
-
-                if start_date <= today <= end_date:
-                    print(f"✅ 현재 진행 중인 행사: {event['title']} ({start_date_str} ~ {end_date_str})")
-                    details = get_event_details(content_id)
-                    for detail in details:
-                        print(f" - {detail['infoname']}: {detail['infotext']}")
-                else:
-                    print(f"❌ 행사 기간 아님: {event['title']} ({start_date_str} ~ {end_date_str})")
-            except ValueError:
-                print(f"⚠️ 날짜 형식 오류 (content_id={content_id})")
-        else:
-            print(f"⚠️ 행사 날짜 정보 없음 (content_id={content_id})")
-else:
-    print("행사 정보를 가져오지 못했습니다.")
-
-
 # 구글 리뷰 가져오기 (Google Maps API)
 def get_place_id_by_name(name, address):
     api_key = os.getenv("GOOGLE_MAP_API_KEY")
