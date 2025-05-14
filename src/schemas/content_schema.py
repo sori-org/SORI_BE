@@ -59,7 +59,7 @@ class ContentListResponse(BaseModel):
     def from_orm(cls, obj):
         return cls(
             content_id=obj.content_id,
-            created_at=obj.created_at.strftime("%Y년 %m월 %d일"),
+            created_at=datetime,
             store_name=getattr(obj, "store_name", None)
         )
 
