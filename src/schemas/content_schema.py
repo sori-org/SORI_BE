@@ -12,8 +12,8 @@ class ContentInput(BaseModel):
     age_range_target: str = Field(..., example="20-30")
     content_format: str = Field(..., example="image_text")  # image_text, cuttoon, cover_text
     external_sources: Optional[List[str]] = Field(default=[], example=["weather", "review"])
-
-
+    user_prompt: Optional[str] = Field(default="", example="맛있는 소보로빵이 유명합니다.")
+    user_image: Optional[str] = Field(default="", example="")
 # 이미지 업로드 후 응답
 class ContentImageUpload(BaseModel):
     image_url: str

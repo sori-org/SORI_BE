@@ -109,7 +109,7 @@ def set_default_store(
     if not store:
         raise HTTPException(status_code=404, detail="가게를 찾을 수 없습니다.")
 
-    current_user.default_store_id = store_id
+    current_user.main_store_id = store_id
     db.commit()
 
     return {"message": "대표 가게가 설정되었습니다."}
