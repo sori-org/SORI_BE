@@ -40,7 +40,7 @@ def update_user_nickname(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    current_user.nickname = body.nickname
+    current_user.display_name = body.display_name
     db.commit()
     return {"message": "닉네임이 수정되었습니다."}
 
@@ -52,4 +52,10 @@ def get_my_stores(
     current_user: User = Depends(get_current_user)
 ):
     stores = db.query(Store).filter(Store.user_id == current_user.user_id).all()
-    return stores
+    store_list = [store.__dict__ for store in stores]
+
+
+    return {
+        "main_store_id": current_user.main_store_id,
+        "stores": store_list
+    }
