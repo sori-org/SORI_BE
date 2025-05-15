@@ -11,7 +11,7 @@ from src.services.kakao_user_register import get_or_create_kakao_user
 from src.db.database import get_db
 from src.services.auth.jwt_handler import create_jwt_token
 from src.services.auth.refresh_token_handler import save_refresh_token
-
+from src.services.auth.dependencies import get_current_user
 router = APIRouter(
     prefix="/api/auth/kakao",
     tags=["로그인"]
