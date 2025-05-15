@@ -25,4 +25,4 @@ def get_db():
     finally:
         db.close()
 
-from src.models import external_data, contents, stores, users
+from src.models import external_data, contents, stores, users, accounts, ages, contents, formats, genders, items, platforms
