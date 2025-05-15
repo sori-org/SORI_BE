@@ -84,19 +84,3 @@ async def kakao_callback_post(
     db: Session = Depends(get_db)
 ):
     return process_kakao_login(payload.code, payload.redirectUri, db)
-
-# [2] 카카오 로그아웃
-@router.post("/logout", summary="로그아웃", description="db와 쿠키에 저장된 refresh_token 삭제")
-def logout(
-    response: Response,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    account = db.query(Account).filter(Account.user_id == current_user.user_id).first()
-    if account:
-        account.kakao_refresh_token = None
-        db.commit()
-
-    response.delete_cookie("refresh_token")  # 쿠키 제거
-
-    return {"message": "로그아웃 완료"}

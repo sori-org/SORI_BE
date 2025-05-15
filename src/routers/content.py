@@ -113,10 +113,41 @@ def generate_image(
     image_url = generate_marketing_image(content, db)
     return {"content_id": content.content_id, "image_url": image_url}
 
+# [6] 콘텐츠 항목별 업데이트 모델
+class FieldUpdate(BaseModel):
+    value: int
 
 class TextUpdate(BaseModel):
     value: str
 
+# [7] 항목 업데이트 라우트
+@router.post("/{content_id}/platform")
+def update_platform(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
+    return update_field(db, content_id, 'platform_id', update.value)
+
+@router.post("/{content_id}/item")
+def update_item(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
+    return update_field(db, content_id, 'item_id', update.value)
+
+@router.post("/{content_id}/age")
+def update_age(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
+    return update_field(db, content_id, 'age_id', update.value)
+
+@router.post("/{content_id}/gender")
+def update_gender(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
+    return update_field(db, content_id, 'gender_id', update.value)
+
+@router.post("/{content_id}/format")
+def update_format(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
+    return update_field(db, content_id, 'format_id', update.value)
+
+@router.post("/{content_id}/external")
+def update_external(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
+    return update_field(db, content_id, 'external_data_id', update.value)
+
+@router.post("/{content_id}/prompt")
+def update_prompt(content_id: int, update: TextUpdate, db: Session = Depends(get_db)):
+    return update_field(db, content_id, 'request_text', update.value)
 
 # [8] 이미지 업로드
 @router.post("/{content_id}/upload-image")
