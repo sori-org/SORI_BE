@@ -46,24 +46,61 @@ def load_prompt_for_sns(sns_platform: str) -> str:
         raise HTTPException(status_code=500, detail="프롬프트 파일을 찾을 수 없습니다.")
 
 # GPT 문구 생성 함수
-def gpt_generate_text(prompt: str) -> str:
+def gpt_generate_text(prompt: str, platform: str = "") -> str:
     try:
         response = openai.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "user", "content": prompt}]
         )
-        return response.choices[0].message.content.strip()
-    except (IndexError, AttributeError):
-        raise HTTPException(status_code=500, detail="GPT 응답 파싱 실패")
+        result_text = response.choices[0].message.content.strip()
+
+        if platform == "instagram":
+            result_text = result_text[:1000]
+
+        return result_text
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"GPT 호출 실패: {str(e)}")
 
 
+
+
 # GPT 응답에서 문구와 해시태그 분리
-def split_gpt_response(response: str) -> tuple[str, str]:
-    hashtags = re.findall(r"#\S+", response)
-    text_without_hashtags = re.sub(r"#\S+", "", response).strip()
-    return text_without_hashtags.strip(), " ".join(hashtags)
+def split_gpt_response(response: str, platform: str) -> tuple[str, str]:
+    try:
+        if platform == "naver_cafe":
+            title_match = re.search(r"\[제목\](.*?)\[본문\]", response, re.DOTALL)
+            body_match = re.search(r"\[본문\](.*?)\[해시태그\]", response, re.DOTALL)
+            tags_match = re.search(r"\[해시태그\](.*)", response, re.DOTALL)
+
+            if not (title_match and body_match and tags_match):
+                raise ValueError("네이버 카페 응답 구조가 맞지 않습니다.")
+
+            title = title_match.group(1).strip()
+            body = body_match.group(1).strip()
+            raw_tags = tags_match.group(1)
+
+            hashtags = re.findall(r"#([A-Za-z0-9가-힣_]+)", raw_tags)
+            hashtag_line = " ".join(f"#{tag}" for tag in hashtags)
+
+            clean_text = f"{title}\n\n{body}"
+            return clean_text, hashtag_line
+
+        else:
+            text_match = re.search(r"\[문구\](.*?)\[해시태그\]", response, re.DOTALL)
+            tags_match = re.search(r"\[해시태그\](.*)", response, re.DOTALL)
+
+            if not (text_match and tags_match):
+                raise ValueError("응답 구조가 맞지 않습니다.")
+
+            clean_text = text_match.group(1).strip()
+            raw_tags = tags_match.group(1)
+
+            hashtags = re.findall(r"#([A-Za-z0-9가-힣_]+)", raw_tags)
+            hashtag_line = " ".join(f"#{tag}" for tag in hashtags)
+
+            return clean_text, hashtag_line
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"GPT 응답 파싱 실패: {str(e)}")
 
 
 # 콘텐츠 생성 및 DB 저장
@@ -121,8 +158,8 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
 - 외부 정보:
 {external_context}
 """
-    full_response = gpt_generate_text(full_prompt)
-    result_text, result_hashtag = split_gpt_response(full_response)
+    full_response = gpt_generate_text(full_prompt, platform=data.sns_platform)
+    result_text, result_hashtag = split_gpt_response(full_response, platform=data.sns_platform)
 
     content.result_text = result_text
     content.result_hashtag = result_hashtag
