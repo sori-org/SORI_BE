@@ -120,36 +120,12 @@ class FieldUpdate(BaseModel):
 class TextUpdate(BaseModel):
     value: str
 
-# [7] 항목 업데이트 라우트
-@router.post("/{content_id}/platform")
-def update_platform(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
-    return update_field(db, content_id, 'platform_id', update.value)
-
-@router.post("/{content_id}/item")
-def update_item(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
-    return update_field(db, content_id, 'item_id', update.value)
-
-@router.post("/{content_id}/age")
-def update_age(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
-    return update_field(db, content_id, 'age_id', update.value)
-
-@router.post("/{content_id}/gender")
-def update_gender(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
-    return update_field(db, content_id, 'gender_id', update.value)
-
-@router.post("/{content_id}/format")
-def update_format(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
-    return update_field(db, content_id, 'format_id', update.value)
-
-@router.post("/{content_id}/external")
-def update_external(content_id: int, update: FieldUpdate, db: Session = Depends(get_db)):
-    return update_field(db, content_id, 'external_data_id', update.value)
 
 @router.post("/{content_id}/prompt")
 def update_prompt(content_id: int, update: TextUpdate, db: Session = Depends(get_db)):
     return update_field(db, content_id, 'request_text', update.value)
 
-# [8] 이미지 업로드
+# [7] 이미지 업로드
 @router.post("/{content_id}/upload-image")
 def upload_user_image(
     content_id: int,
@@ -172,7 +148,7 @@ def upload_user_image(
     db.commit()
     return {"message": "콘텐츠 이미지 업로드 완료", "user_image_url": image_url}
 
-# [9] 공통 업데이트 처리 함수
+# [8] 공통 업데이트 처리 함수
 def update_field(db, content_id, field_name, value):
     content = db.query(Content).filter(Content.content_id == content_id).first()
     if not content:
