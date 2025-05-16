@@ -49,7 +49,7 @@ class ContentCreationResponse(BaseModel):
 
 class ContentListResponse(BaseModel):
     content_id: int
-    created_at: str  # datetime → str
+    created_at: datetime
     store_name: Optional[str] = None  # ← store 테이블과 조인 필요
 
     class Config:
