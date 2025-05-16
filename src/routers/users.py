@@ -40,7 +40,7 @@ def update_user_nickname(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    current_user.displayName = body.displayName
+    current_user.display_name = body.displayName
     db.commit()
     return {"message": "닉네임이 수정되었습니다."}
 
