@@ -53,14 +53,6 @@ def get_place_id_from_address(address: str) -> str:
     return None
 
 
-address = "경기도 성남시 수정구 복정로 18 1층"
-latitude, longitude = get_coordinates_from_address(address)
-if latitude and longitude:
-    print(f"위도: {latitude}, 경도: {longitude}")
-else:
-    print("위도와 경도를 가져올 수 없습니다.")
-
-
 # 날씨 정보 가져오기 (OpenWeatherMap API)
 def get_weather_data(city: str) -> str:
     api_key = os.getenv("OPENWEATHERMAP_API_KEY")
@@ -178,25 +170,6 @@ def get_reviews(place_id):
     if response.status_code == 200 and data['status'] == 'OK':
         return data['result'].get('reviews', [])
     return []
-
-store_name = "겐코쇼쿠도 복정점"
-store_address = "경기도 성남시 수정구 복정로 18"
-
-place_id = get_place_id_by_name(store_name, store_address)
-
-if place_id:
-    reviews = get_reviews(place_id)
-    if reviews:
-        print("⭐ 리뷰 정보:")
-        for r in reviews:
-            author = r.get('author_name', '익명')
-            rating = r.get('rating', 'N/A')
-            text = r.get('text', '')
-            print(f"- {author} ({rating}점): {text}")
-    else:
-        print("리뷰가 없습니다.")
-else:
-    print("장소를 찾을 수 없습니다.")
 
 # 유행 정보 가져오기 (Google Trends / Naver Search API)
 def get_trending_data() -> str:
