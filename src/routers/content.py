@@ -110,7 +110,18 @@ def generate_image(
         raise HTTPException(status_code=404, detail="Content not found")
     if content.user_id != current_user.user_id:
         raise HTTPException(status_code=403, detail="해당 콘텐츠에 대한 권한이 없습니다.")
+
+    #
     image_url = generate_marketing_image(content, db)
+
+    #db commit
+    content.image_url = image_url
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"이미지 URL 저장 실패: {str(e)}")
+
     return {"content_id": content.content_id, "image_url": image_url}
 
 
