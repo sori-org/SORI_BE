@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from src.schemas.content_schema import ContentInput
 from src.models.contents import Content
 from src.models.stores import Store
+from src.models.items import Item
 from src.services.external_data_service import (
     get_weather_data, get_event_data, get_review_data
 )
@@ -44,6 +45,13 @@ def load_prompt_for_sns(sns_platform: str) -> str:
             return f.read()
     except FileNotFoundError:
         raise HTTPException(status_code=500, detail="프롬프트 파일을 찾을 수 없습니다.")
+
+# promotion_target에서 item_id를 추출
+def resolve_id_by_name(db: Session, model, name_field: str, name_value: str, id_field: str = "id") -> int | None:
+    if not name_value:
+        return None
+    row = db.query(model).filter(getattr(model, name_field) == name_value).first()
+    return getattr(row, id_field) if row else None
 
 # GPT 문구 생성 함수
 def gpt_generate_text(prompt: str, platform: str = "") -> str:
@@ -128,13 +136,15 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
             raise HTTPException(status_code=400, detail=f"지원되지 않는 외부 데이터 타입입니다: {key}")
         external_data_id = EXTERNAL_DATA_MAP[key]
 
+    item_id = resolve_id_by_name(db, Item, "item_name", data.promotion_target, "item_id")
+
     try:
         content = Content(
             user_id=user_id,
             store_id=data.store_id,
             platform_id=PLATFORM_MAP.get(data.sns_platform),
             format_id=FORMAT_MAP.get(data.content_format),
-            item_id=None,
+            item_id=item_id,
             age_id=AGE_MAP.get(data.age_range_target),
             gender_id=GENDER_MAP.get(data.gender_target),
             external_data_id=external_data_id,
