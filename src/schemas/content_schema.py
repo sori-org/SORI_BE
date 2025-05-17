@@ -52,8 +52,7 @@ class ContentListResponse(BaseModel):
     created_at: datetime
     store_name: Optional[str] = None  # ← store 테이블과 조인 필요
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_orm(cls, obj):
