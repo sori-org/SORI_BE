@@ -4,14 +4,17 @@ from pydantic import BaseModel, Field
 import requests, os
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from src.services.auth.dependencies import  get_current_user
+from src.models.accounts import Account
+from src.models.users import User
 from src.schemas.users import UserOut
 from src.services.kakao_user_info import get_kakao_user_info, extract_user_info
 from src.services.kakao_user_register import get_or_create_kakao_user
 from src.db.database import get_db
 from src.services.auth.jwt_handler import create_jwt_token
 from src.services.auth.refresh_token_handler import save_refresh_token
-from src.models import User
+from src.services.auth.dependencies import get_current_user
+
+
 router = APIRouter(
     prefix="/api/auth/kakao",
     tags=["로그인"]
