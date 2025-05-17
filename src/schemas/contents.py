@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -13,11 +13,7 @@ class ContentBase(BaseModel):
     image_url: str
     request_text: str
 
-    class Config:
-        from_attributes = True
-
-from pydantic import BaseModel
-from typing import Optional
+    model_config = ConfigDict(from_attributes=True)
 
 class ContentCreate(BaseModel):
     user_id: int

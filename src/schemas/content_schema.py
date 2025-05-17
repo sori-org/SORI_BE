@@ -50,7 +50,7 @@ class ContentCreationResponse(BaseModel):
 class ContentListResponse(BaseModel):
     content_id: int
     created_at: datetime
-    store_name: Optional[str] = None  # ← store 테이블과 조인 필요
+    store_name = getattr(obj, "store_name", None)  # ← store 테이블과 조인 필요
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -69,10 +69,9 @@ class ContentDetailResponse(BaseModel):
     result_text: str
     result_hashtag: str
     image_url: Optional[str]
-    created_at: str  # datetime → str
+    created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
     @classmethod
     def from_orm(cls, obj):
@@ -82,5 +81,5 @@ class ContentDetailResponse(BaseModel):
             result_text=obj.result_text,
             result_hashtag=obj.result_hashtag,
             image_url=obj.image_url,
-            created_at=obj.created_at.strftime("%Y년 %m월 %d일")
+            created_at=obj.created_at
         )
