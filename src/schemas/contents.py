@@ -28,3 +28,4 @@ class ContentCreate(BaseModel):
     gender_id: Optional[int]
     external_data_id: Optional[int]
     request_text: Optional[str]
+    promotion_name: Optional[str]

@@ -138,7 +138,8 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
             age_id=AGE_MAP.get(data.age_range_target),
             gender_id=GENDER_MAP.get(data.gender_target),
             external_data_id=external_data_id,
-            request_text=data.promotion_name
+            request_text=data.user_prompt,
+            user_image_url=data.user_image
         )
         db.add(content)
         db.commit()
@@ -157,6 +158,8 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
 - 콘텐츠 형식: {data.content_format}
 - 외부 정보:
 {external_context}
+- 추가 설명:
+{data.user_prompt}
 """
     full_response = gpt_generate_text(full_prompt, platform=data.sns_platform)
     result_text, result_hashtag = split_gpt_response(full_response, platform=data.sns_platform)
