@@ -61,12 +61,12 @@ def describe_user_image(content: Content) -> str:
         json={
             "model": "gpt-4o",
             "messages": [
-                {"role": "system", "content": "당신은 이미지 분석 도우미입니다. 주어진 이미지를 간결하고 마케팅적으로 설명해주세요."},
+                {"role": "system", "content": "당신은 이미지 분석 도우미입니다. 주어진 이미지를 한국어로 1~2문장으로 간결하게 설명해주세요."},
                 {
                     "role": "user",
                     "content": [
                         {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{encoded_image}"}},
-                        {"type": "text", "text": "이 이미지를 분석해서 마케팅에 쓸 수 있는 간단한 설명을 한국어로 1~2문장으로 요약해줘."}
+                        {"type": "text", "text": "이 이미지를 분석해서 가게일 경우 가게의 인테리어, 분위기, 뷰, 특징을, 특정 상품일 경우 해당 상품의 정보, 이미지 속 상품의 긍정적인 특징을 홍보용으로 작성해줘"}
                     ]
                 }
             ],
