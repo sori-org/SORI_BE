@@ -50,7 +50,7 @@ class ContentCreationResponse(BaseModel):
 class ContentListResponse(BaseModel):
     content_id: int
     created_at: datetime
-    store_name = getattr(obj, "store_name", None)  # ← store 테이블과 조인 필요
+    store_name: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
