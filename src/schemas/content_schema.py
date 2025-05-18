@@ -7,7 +7,7 @@ class ContentInput(BaseModel):
     store_id: int
     sns_platform: str = Field(..., example="instagram")
     promotion_target: str = Field(..., example="store")  # store or menu
-    promotion_name: str = Field(..., example="우리동네 베이커리")
+    promotion_name: Optional[str] = Field(..., example="우리동네 베이커리")
     gender_target: str = Field(..., example="female")  # female or male
     age_range_target: str = Field(..., example="20-30")
     content_format: str = Field(..., example="image_text")  # image_text, cuttoon, cover_text

@@ -23,7 +23,7 @@ def get_weather_data(city: str = "Seoul") -> str:
 def get_event_data(area_code: str = "1") -> str:
     api_key = os.getenv("TOUR_API_KEY")
     url = (
-        "https://apis.data.go.kr/B551011/KorService1/searchFestival1"
+        "http://apis.data.go.kr/B551011/KorService1/searchFestival1"
         f"?serviceKey={api_key}"
         "&MobileOS=ETC&MobileApp=AppTest&_type=json"
         f"&areaCode={area_code}&numOfRows=1"

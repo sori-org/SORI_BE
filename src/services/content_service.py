@@ -10,6 +10,7 @@ from src.models.items import Item
 from src.services.external_data_service import (
     get_weather_data, get_event_data, get_review_data
 )
+from src.services.external_api import get_external_data_multi
 import re
 
 
@@ -29,9 +30,9 @@ SNS_PROMPT_MAP = {
 
 # 매핑 테이블
 PLATFORM_MAP = {"instagram": 1, "twitter": 2, "naver_cafe": 3}
-FORMAT_MAP = {"image_text": 1, "cuttoon": 2, "cover_text": 3}
+FORMAT_MAP = {"image+text": 1, "cut_toon": 2, "post_cover+text": 3}
 GENDER_MAP = {"male": 1, "female": 2}
-AGE_MAP = {"10-20": 1, "20-30": 2, "30-40": 3, "40-50": 4}
+AGE_MAP = {"10-20": 1, "20-30": 2, "30-40": 3, "40+": 4}
 EXTERNAL_DATA_MAP = {"weather": 1, "review": 2, "event": 3, "trend": 4}
 
 # SNS별 프롬프트 불러오기
@@ -114,15 +115,11 @@ def split_gpt_response(response: str, platform: str) -> tuple[str, str]:
 # 콘텐츠 생성 및 DB 저장
 def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> int:
     # 외부 데이터 수집
-    extra_info = []
-    if "weather" in data.external_sources:
-        extra_info.append(get_weather_data("Seoul"))
-    if "event" in data.external_sources:
-        extra_info.append(get_event_data("1"))
-    if "review" in data.external_sources:
-        extra_info.append(get_review_data(data.promotion_name))
-    external_context = "\n".join(extra_info)
+    store = db.query(Store).filter(Store.store_id == data.store_id).first()
+    if not store:
+        raise HTTPException(status_code=400, detail="유효하지 않은 store_id입니다.")
 
+    external_context = get_external_data_multi(data.external_sources, store.store_address, data.promotion_name)
     # store_id 유효성 검사
     store = db.query(Store).filter(Store.store_id == data.store_id).first()
     if not store:
