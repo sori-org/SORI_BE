@@ -54,26 +54,27 @@ Only use API data that user chose. Ignore all the other APIs.
 
 Must respond with following format:
 
-### AI Image Prompt
+## AI Image Prompt
 
-Details of the responses
+### If Format is "cut_toon":
+Generate a **4-panel Korean comic strip** (cut-toon) with speech bubbles.
+- Art style: simple, round, animal-blob-like characters. Clear expressions, thick lines, pastel or warm color tones.
+- All text must be in **Korean**, fully rendered (not broken), and readable.
+- The comic must promote the item using **a small narrative or situation**.
+- Each panel should be clearly separated.
+- Integrate external data (e.g. trend, event, review) into the story if relevant.
+- Reference user request text and reflect it in character dialogue or scenario.
 
-1. **AI Image Prompt** (if cut_toon)
+### If Format is "post_cover+text":
+Create a **fully illustrated image** that matches the platform, age, gender, and item type.
+- Style should be **exaggerated and decorative**: flashy colors, outlined objects, composition emphasizing the product or store.
+- Overlay one **short Korean subtitle** (max 20 characters) at the bottom.
+- Text must be in **white with black outline**, and important words in **strong color**.
+- Reflect user request and relevant external data in both visuals and caption.
 
-Art Style & Characters:
-Create a 4-panel comic strip in a style based by input condition.
-The characters should be cute, round, and simple, resembling animal-like figures or blob creatures with minimalistic but expressive features.
-
-2. **AI Image Prompt** (if image+text)
-
-Art Style:
-Generate and overlay Korean subtitles on the image given by the user.
-The subtitles must be short(20자 이내) and concise promotional text based on the input condition given by the user.
-The subtitles must be white text with black outline.
-
-2. **AI Image Prompt** (if post_cover+text)
-
-Art Style:
-Create an original image and subtitles.
-The subtitles should be short and concise promotional text based on the input condition given by the user.
-The image must be decorated, emphasized, exaggerated.
+### If Format is "image+text":
+Generate one short Korean caption (max 20 characters) to overlay on the **provided image**.
+- The caption must match the age/gender/platform context.
+- Text must be **white with black outline**, and **highlight key word(s) in different color**.
+- Place the text on **bottom of the image**.
+- Do NOT generate or modify the image itself.

@@ -73,9 +73,9 @@ def update_store(
     if not store:
         raise HTTPException(status_code=404, detail="가게를 찾을 수 없습니다.")
 
-    store.name = body.name
-    store.phone = body.phone
-    store.description = body.description
+    store.store_name = body.name
+    store.store_phone = body.phone
+    store.store_description = body.description
     db.commit()
 
     return {"message": "가게 정보가 수정되었습니다."}

@@ -85,20 +85,9 @@ def get_content_detail(
     return ContentDetailResponse.from_orm(content)
 
 
-# [4] 기본 콘텐츠 생성
-@router.post("", summary="기본 콘텐츠 생성")
-def create_content(
-    data: ContentCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    content = Content(**data.dict(), user_id=current_user.user_id)
-    db.add(content)
-    db.commit()
-    db.refresh(content)
-    return {"content_id": content.content_id, "message": "콘텐츠가 생성되었습니다."}
 
-# [5] 이미지 생성
+
+# [4] 이미지 생성
 @router.post("/{content_id}/generate-image", summary="이미지 생성")
 def generate_image(
     content_id: int,
@@ -136,7 +125,6 @@ class TextUpdate(BaseModel):
 def update_prompt(content_id: int, update: TextUpdate, db: Session = Depends(get_db)):
     return update_field(db, content_id, 'request_text', update.value)
 
-# [7] 이미지 업로드
 @router.post("/{content_id}/upload-image")
 def upload_user_image(
     content_id: int,
@@ -147,19 +135,21 @@ def upload_user_image(
     content = db.query(Content).filter(Content.content_id == content_id).first()
     if not content:
         raise HTTPException(status_code=404, detail="Content not found")
-    content_dir = os.path.join("uploaded_images", f"content_{content_id}")
-    os.makedirs(content_dir, exist_ok=True)
+
+
     ext = os.path.splitext(file.filename)[1]
-    unique_filename = f"{uuid4().hex}{ext}"
-    file_path = os.path.join(content_dir, unique_filename)
+    filename = f"content_{content_id}_uploaded_image{ext}"
+    file_path = os.path.join("uploaded_images", filename)
+
     with open(file_path, "wb") as f:
         f.write(file.file.read())
-    image_url = f"/static/content_{content_id}/{unique_filename}"
+
+    image_url = f"/uploaded_images/{filename}"
     content.user_image_url = image_url
     db.commit()
     return {"message": "콘텐츠 이미지 업로드 완료", "user_image_url": image_url}
 
-# [8] 공통 업데이트 처리 함수
+# [9] 공통 업데이트 처리 함수
 def update_field(db, content_id, field_name, value):
     content = db.query(Content).filter(Content.content_id == content_id).first()
     if not content:
