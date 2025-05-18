@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from .db.database import Base, engine
 from .routers import kakao_login, users, jwt_token, refresh, content
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,7 +18,7 @@ class UTF8JSONResponse(JSONResponse):
 
 # FastAPI 앱 생성
 app = FastAPI(default_response_class=UTF8JSONResponse)
-print("🔍 현재 DATABASE_URL:", os.getenv("DATABASE_URL"))
+
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 
@@ -46,6 +47,9 @@ app.include_router(refresh.router)
 app.include_router(store.router)
 app.include_router(search.router)
 app.include_router(content.router)
+
+app.mount("/generated_images", StaticFiles(directory="generated_images"), name="generates")
+app.mount("/uploaded_images", StaticFiles(directory="uploaded_images"), name="uploads")
 
 def custom_openapi():
     if app.openapi_schema:

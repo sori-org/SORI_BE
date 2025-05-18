@@ -10,7 +10,7 @@ from src.models.external_data import ExternalData
 from src.models.users import User
 from src.models.stores import Store
 from sqlalchemy.orm import Session
-from src.services.external_api import get_external_data
+from src.services.external_api import get_external_data_multi
 import base64
 import requests
 import os
@@ -42,8 +42,8 @@ def describe_user_image(content: Content) -> str:
         return ""
 
     image_path = content.user_image_url
-    if image_path.startswith("/static/"):
-        image_path = image_path.replace("/static/", "uploaded_images/")
+    if image_path.startswith("/uploaded_images/"):
+        image_path = image_path.replace("/uploaded_images/", "uploaded_images/")
 
     if not os.path.exists(image_path):
         return ""
@@ -51,7 +51,6 @@ def describe_user_image(content: Content) -> str:
     with open(image_path, "rb") as f:
         image_bytes = f.read()
 
-    # base64 인코딩
     encoded_image = base64.b64encode(image_bytes).decode("utf-8")
 
     # GPT-4o Vision API 호출 (Text + Image)
@@ -83,7 +82,7 @@ def describe_user_image(content: Content) -> str:
     return description
 
 def build_chain():
-    system_message = load_system_message("prompts/image_prompt.txt")
+    system_message = load_system_message("src/prompts/image_prompt.txt")
     template = system_message + """
 
     플랫폼: {platform}
@@ -114,14 +113,14 @@ def generate_marketing_image(content: Content, db: Session) -> str:
     format_name = get_text_by_id(db, Format, Format.format_id, content.format_id, "format_name")
     age_name = get_text_by_id(db, Age, Age.age_id, content.age_id, "age_category")
     gender_name = get_text_by_id(db, Gender, Gender.gender_id, content.gender_id, "gender_category")
-    external_data_name = get_text_by_id(db, ExternalData, ExternalData.external_data_id, content.external_data_id, "external_data_name")
+    external_data_names = external_data_name.split(",")  # 예: "weather,review"
 
     for name, value in [("platform", platform_name), ("item", item_name), ("format", format_name),
                         ("age", age_name), ("gender", gender_name), ("external", external_data_name)]:
         if not value:
             raise Exception(f"{name} 값이 비어 있습니다. DB를 확인해주세요.")
 
-    external_data_text = get_external_data(external_data_name, store_address, store_name)
+    external_data_text = get_external_data_multi(external_data_names, store_address, store_name)
 
     user_image_description = describe_user_image(content)
     if user_image_description:
