@@ -113,12 +113,18 @@ def generate_image(
 
     return {"content_id": content.content_id, "image_url": image_url}
 
+# [6] 콘텐츠 항목별 업데이트 모델
+class FieldUpdate(BaseModel):
+    value: int
 
 class TextUpdate(BaseModel):
     value: str
 
 
-# [5] 이미지 업로드
+@router.post("/{content_id}/prompt")
+def update_prompt(content_id: int, update: TextUpdate, db: Session = Depends(get_db)):
+    return update_field(db, content_id, 'request_text', update.value)
+
 @router.post("/{content_id}/upload-image")
 def upload_user_image(
     content_id: int,
@@ -143,7 +149,7 @@ def upload_user_image(
     db.commit()
     return {"message": "콘텐츠 이미지 업로드 완료", "user_image_url": image_url}
 
-# [6] 공통 업데이트 처리 함수
+# [9] 공통 업데이트 처리 함수
 def update_field(db, content_id, field_name, value):
     content = db.query(Content).filter(Content.content_id == content_id).first()
     if not content:
