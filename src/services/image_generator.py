@@ -95,12 +95,13 @@ def build_chain():
     성별: {gender}
     외부 데이터: {external}
     유저 요청: {user_request}
-
+    가게 정보: {store_description}
     위 내용을 참고하여, 반드시 image_prompt.txt에서 제시된 포맷과 룰을 적용해 **최종 DALL·E 프롬프트만** 작성해주세요.
+    **All Korean text in the comic must be fully rendered, clearly legible, and not broken, distorted, or replaced with placeholder symbols.**
     설명이나 지침은 넣지 말고, 결과 프롬프트만 주세요.
     """
     prompt = PromptTemplate(
-        input_variables=["platform", "item", "format", "age", "gender", "external", "user_request"],
+        input_variables=["platform", "item", "format", "age", "gender", "external", "user_request", "store_description", "user_image_description"],
         template=template
     )
     llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
@@ -149,7 +150,8 @@ def generate_marketing_image(content: Content, db: Session) -> str:
         gender=gender_name,
         external=external_data_text,
         user_request=content.request_text,
-        store_description=store_description
+        store_description=store_description,
+        user_image_description=user_image_description
     )
     result = llm.invoke(formatted_prompt)
     final_prompt = result.content.strip()
