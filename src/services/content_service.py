@@ -58,7 +58,7 @@ def resolve_id_by_name(db: Session, model, name_field: str, name_value: str, id_
 def gpt_generate_text(prompt: str, platform: str = "") -> str:
     try:
         response = openai.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4.1",
             messages=[{"role": "user", "content": prompt}]
         )
         result_text = response.choices[0].message.content.strip()

@@ -61,7 +61,7 @@ def describe_user_image(content: Content) -> str:
         "https://api.openai.com/v1/chat/completions",
         headers={"Authorization": f"Bearer {api_key}"},
         json={
-            "model": "gpt-4o",
+            "model": "gpt-4.1",
             "messages": [
                 {"role": "system", "content": "당신은 이미지 분석 도우미입니다. 주어진 이미지를 한국어로 1~2문장으로 간결하게 설명해주세요."},
                 {
@@ -104,7 +104,7 @@ def build_chain():
         input_variables=["platform", "item", "format", "age", "gender", "external", "user_request", "store_description", "user_image_description"],
         template=template
     )
-    llm = ChatOpenAI(model="gpt-4o", temperature=0.7)
+    llm = ChatOpenAI(model="gpt-4.1", temperature=0.7)
     return prompt, llm
 
 def generate_marketing_image(content: Content, db: Session) -> str:
