@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Query, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from src.schemas.content_schema import ContentInput, ContentResult, ContentListResponse, ContentDetailResponse
 from src.services.content_service import save_content_and_generate, get_content_result
@@ -11,7 +11,8 @@ from src.services.image_generator import generate_marketing_image
 from src.schemas.contents import ContentCreate
 from pydantic import BaseModel
 from uuid import uuid4
-from typing import Literal
+from typing import Literal, Optional, List
+import json
 import os
 
 router = APIRouter(
@@ -22,10 +23,39 @@ router = APIRouter(
 # [0] 사용자 입력 저장 + 내부 생성
 @router.post("/inputs", summary="콘텐츠 생성 (1): 사용자 선택 입력 -> 결과 생성")
 def store_content_input(
-    payload: ContentInput,
+    store_id: int = Form(...),
+    sns_platform: str = Form(...),
+    promotion_target: str = Form(...),
+    promotion_name: Optional[str] = Form(""),
+    gender_target: str = Form(...),
+    age_range_target: str = Form(...),
+    content_format: str = Form(...),
+    external_sources: Optional[str] = Form(""),  # 배열은 프론트에서 JSON.stringfy해서 보내야 함
+    user_prompt: Optional[str] = Form(""),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # external_sources가 문자열로 오면 파싱해줌
+    try:
+        ext_sources = json.loads(external_sources) if external_sources else []
+    except Exception:
+        ext_sources = []
+
+    from src.schemas.content_schema import ContentInput  # ContentInput import 위치 맞게 수정
+
+    # ContentInput 인스턴스 생성 (필드 맞게 전달)
+    payload = ContentInput(
+        store_id=store_id,
+        sns_platform=sns_platform,
+        promotion_target=promotion_target,
+        promotion_name=promotion_name,
+        gender_target=gender_target,
+        age_range_target=age_range_target,
+        content_format=content_format,
+        external_sources=ext_sources,
+        user_prompt=user_prompt,
+    )
+
     content_id = save_content_and_generate(db, current_user.user_id, payload)
     return {
         "content_id": content_id,
