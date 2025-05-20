@@ -146,7 +146,6 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
             gender_id=GENDER_MAP.get(data.gender_target),
             external_data_id=external_data_id,
             request_text=data.user_prompt,
-            user_image_url=data.user_image
         )
         db.add(content)
         db.commit()
