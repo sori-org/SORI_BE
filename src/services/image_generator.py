@@ -199,6 +199,10 @@ def generate_marketing_image(content: Content, db: Session) -> str:
     elif "b64_json" in image_data:
         # Base64 이미지 처리
         image_bytes = base64.b64decode(image_data["b64_json"])
+
+        print("📁 현재 작업 디렉토리:", os.getcwd())
+        print("📁 이미지 저장 경로:", filename)
+
         with open(filename, 'wb') as f:
             f.write(image_bytes)
         image_url = filename
