@@ -125,15 +125,16 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
     if not store:
         raise HTTPException(status_code=400, detail="유효하지 않은 store_id입니다.")
 
-    # 외부 데이터 매핑 키 검사
-    external_data_id = None
+    # 외부 데이터 저장 (M2M 관계로)
+    external_data_objs = []
     if data.external_sources:
-        key = data.external_sources[0]
-        print(f"📦 external_sources[0]: {key} ({type(key)})")
-        if key not in EXTERNAL_DATA_MAP:
-            raise HTTPException(status_code=400, detail=f"지원되지 않는 외부 데이터 타입입니다: {key}")
-        external_data_id = EXTERNAL_DATA_MAP[key]
-    print(f"📦 external_data_id to save: {external_data_id}")  # ← 여기에 넣어
+        for key in data.external_sources:
+            key = key.strip()
+            external_data_id = EXTERNAL_DATA_MAP.get(key)
+            if external_data_id:
+                ext = db.query(ExternalData).filter(ExternalData.external_data_id == external_data_id).first()
+                if ext:
+                    external_data_objs.append(ext)
 
     item_id = resolve_id_by_name(db, Item, "item_name", data.promotion_target, "item_id")
 
@@ -146,7 +147,7 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
             item_id=item_id,
             age_id=AGE_MAP.get(data.age_range_target),
             gender_id=GENDER_MAP.get(data.gender_target),
-            external_data_id=external_data_id,
+            external_data_list=external_data_objs,
             request_text=data.user_prompt,
         )
         db.add(content)
