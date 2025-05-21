@@ -7,6 +7,7 @@ from src.schemas.content_schema import ContentInput
 from src.models.contents import Content
 from src.models.stores import Store
 from src.models.items import Item
+from src.models.external_data import ExternalData
 from src.services.external_data_service import (
     get_weather_data, get_event_data, get_review_data
 )
@@ -132,7 +133,7 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
             key = key.strip()
             external_data_id = EXTERNAL_DATA_MAP.get(key)
             if external_data_id:
-                ext = db.query(ExternalData).filter(ExternalData.external_data_id == external_data_id).first()
+                ext = db.query(ExternalData).filter(externalData.external_data_id == external_data_id).first()
                 if ext:
                     external_data_objs.append(ext)
 
