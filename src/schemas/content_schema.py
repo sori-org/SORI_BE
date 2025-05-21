@@ -37,7 +37,7 @@ class ContentImageResponse(BaseModel):
 class ContentResult(BaseModel):
     content_id: int
     text: Optional[str]
-    hashtags: Optionsl[List[str]]
+    hashtags: Optional[List[str]]
     image_url: Optional[str] = None
 
 
