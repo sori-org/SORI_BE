@@ -256,6 +256,10 @@ def get_trending_data():
 
 # 외부 데이터에 맞는 함수 호출
 def get_external_data_multi(external_data_names: list[str], address: str, name: str) -> str:
+    print("🌍 get_external_data_multi 호출됨")
+    print("👉 요청된 외부 데이터 이름들:", external_data_names)
+    print("👉 주소:", address)
+    print("👉 가게 이름:", name)
     results = []
 
     for external_data_name in external_data_names:
