@@ -30,7 +30,7 @@ def store_content_input(
     gender_target: str = Form(...),
     age_range_target: str = Form(...),
     content_format: str = Form(...),
-    external_sources: Optional[str] = Form(""),  # 배열은 프론트에서 JSON.stringfy해서 보내야 함
+    external_sources: Optional[str] = Form(""),
     user_prompt: Optional[str] = Form(""),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
