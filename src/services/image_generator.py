@@ -176,6 +176,7 @@ def generate_marketing_image(content: Content, db: Session) -> str:
         }
     )
 
+
     if dalle_res.status_code != 200:
         raise Exception(f"GPT Image 1 API 호출 실패: {dalle_res.status_code}, {dalle_res.text}")
 

@@ -57,9 +57,26 @@ def store_content_input(
     )
 
     content_id = save_content_and_generate(db, current_user.user_id, payload)
+    content = db.query(Content).filter(Content.content_id == content_id).first()
+    if not content:
+        raise HTTPException(status_code=404, detail="생성된 콘텐츠 조회 실패")
+
+    if content.user_id != current_user.user_id:
+        raise HTTPException(status_code=403, detail="콘텐츠 소유자 불일치")
+
+    image_url = generate_marketing_image(content, db)
+
+    content.image_url = image_url
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"이미지 URL 저장 실패: {str(e)}")
+
     return {
         "content_id": content_id,
-        "message": "콘텐츠 생성 완료. content_id를 사용해서 생성된 콘텐츠 조회하기!"
+        "image_url": image_url,
+        "message": "콘텐츠(텍스트+이미지) 생성 완료"
     }
 
 # [1] 최종 결과 조회
