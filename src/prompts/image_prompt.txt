@@ -10,8 +10,8 @@ Item Type: {item}  // "store" or "product"
 Format: {format}
 Target Age: {age}
 Target Gender: {gender}
-External Data: {external}
-User Request Text: {user_request}
+External Data: {external} //optional
+User Request Text: {user_request} // optional
 store_description (optional, required only if item == "store")
 User Image: {user_image_description} // optional
 

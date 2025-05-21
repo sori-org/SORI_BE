@@ -117,11 +117,12 @@ def generate_marketing_image(content: Content, db: Session) -> str:
     format_name = get_text_by_id(db, Format, Format.format_id, content.format_id, "format_name")
     age_name = get_text_by_id(db, Age, Age.age_id, content.age_id, "age_category")
     gender_name = get_text_by_id(db, Gender, Gender.gender_id, content.gender_id, "gender_category")
-    external_data_name = get_text_by_id(db, ExternalData, ExternalData.external_data_id, content.external_data_id, "external_data_name")
-    external_data_names = external_data_name.split(",")  # 예: "weather,review"
+    external_data_names = [e.external_data_name for e in content.external_data_list]
+
+    external_data_names_str = ", ".join(external_data_names) if external_data_names else "없음"
 
     for name, value in [("platform", platform_name), ("item", item_name), ("format", format_name),
-                        ("age", age_name), ("gender", gender_name), ("external", external_data_name)]:
+                        ("age", age_name), ("gender", gender_name), ("external", external_data_names_str)]:
         if not value:
             raise Exception(f"{name} 값이 비어 있습니다. DB를 확인해주세요.")
 
