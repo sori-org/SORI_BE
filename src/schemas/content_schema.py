@@ -36,8 +36,8 @@ class ContentImageResponse(BaseModel):
 # 최종 결과 조회
 class ContentResult(BaseModel):
     content_id: int
-    text: str
-    hashtags: List[str]
+    text: Optional[str]
+    hashtags: Optionsl[List[str]]
     image_url: Optional[str] = None
 
 
@@ -65,8 +65,8 @@ class ContentListResponse(BaseModel):
 class ContentDetailResponse(BaseModel):
     content_id: int
     platform_id: Optional[int]
-    result_text: str
-    result_hashtag: str
+    result_text: Optional[str]
+    result_hashtag: Optional[str]
     image_url: Optional[str]
     created_at: datetime
 

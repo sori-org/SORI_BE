@@ -137,7 +137,10 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
                 if ext:
                     external_data_objs.append(ext)
 
-    item_id = resolve_id_by_name(db, Item, "item_name", data.promotion_target, "item_id")
+    target = data.promotion_target
+    if target == "menu":
+        target = "product"
+    item_id = resolve_id_by_name(db, Item, "item_name", target, "item_id")
 
     try:
         content = Content(
