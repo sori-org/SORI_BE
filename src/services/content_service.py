@@ -129,6 +129,7 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
     external_data_id = None
     if data.external_sources:
         key = data.external_sources[0]
+        print(f"📦 external_sources[0]: {key} ({type(key)})")
         if key not in EXTERNAL_DATA_MAP:
             raise HTTPException(status_code=400, detail=f"지원되지 않는 외부 데이터 타입입니다: {key}")
         external_data_id = EXTERNAL_DATA_MAP[key]
