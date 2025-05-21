@@ -33,7 +33,7 @@ PLATFORM_MAP = {"instagram": 1, "twitter": 2, "naver_cafe": 3}
 FORMAT_MAP = {"image+text": 1, "cut_toon": 2, "post_cover+text": 3}
 GENDER_MAP = {"male": 1, "female": 2}
 AGE_MAP = {"10-20": 1, "20-30": 2, "30-40": 3, "40+": 4}
-EXTERNAL_DATA_MAP = {"weather": 1, "review": 2, "event": 3, "trend": 4}
+EXTERNAL_DATA_MAP = {"weather": 1, "review": 2, "festival": 3, "trend": 4}
 
 # SNS별 프롬프트 불러오기
 def load_prompt_for_sns(sns_platform: str) -> str:
@@ -132,6 +132,7 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
         if key not in EXTERNAL_DATA_MAP:
             raise HTTPException(status_code=400, detail=f"지원되지 않는 외부 데이터 타입입니다: {key}")
         external_data_id = EXTERNAL_DATA_MAP[key]
+    print(f"📦 external_data_id to save: {external_data_id}")  # ← 여기에 넣어
 
     item_id = resolve_id_by_name(db, Item, "item_name", data.promotion_target, "item_id")
 
