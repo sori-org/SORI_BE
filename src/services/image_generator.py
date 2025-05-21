@@ -118,7 +118,7 @@ def generate_marketing_image(content: Content, db: Session) -> str:
     age_name = get_text_by_id(db, Age, Age.age_id, content.age_id, "age_category")
     gender_name = get_text_by_id(db, Gender, Gender.gender_id, content.gender_id, "gender_category")
     external_data_names = [e.external_data_name for e in content.external_data_list]
-
+    print("🧪 external_data_names:", external_data_names)
     external_data_names_str = ", ".join(external_data_names) if external_data_names else "없음"
 
     for name, value in [("platform", platform_name), ("item", item_name), ("format", format_name),
@@ -154,8 +154,23 @@ def generate_marketing_image(content: Content, db: Session) -> str:
         store_description=store_description,
         user_image_description=user_image_description
     )
-    result = llm.invoke(formatted_prompt)
-    final_prompt = result.content.strip()
+
+    try:
+        result = llm.invoke(formatted_prompt)
+        print("🧠 GPT 응답 result 타입:", type(result))
+        print("🧠 GPT 응답 result 내용:", result)
+    except Exception as e:
+        import traceback
+        print("❌ GPT invoke 중 예외 발생:", e)
+        traceback.print_exc()
+        raise Exception("GPT 호출 실패: " + str(e))
+
+    if hasattr(result, "content"):
+        final_prompt = result.content.strip()
+    elif isinstance(result, str):
+        final_prompt = result.strip()
+    else:
+        raise Exception("GPT 응답 파싱 실패: 응답 구조가 맞지 않습니다.")
 
     if len(final_prompt) > MAX_PROMPT_LENGTH:
         final_prompt = final_prompt[:MAX_PROMPT_LENGTH]

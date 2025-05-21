@@ -30,16 +30,12 @@ def store_content_input(
     gender_target: str = Form(...),
     age_range_target: str = Form(...),
     content_format: str = Form(...),
-    external_sources: Optional[str] = Form(""),
+    external_sources: List[str] = Form(default=[]),
     user_prompt: Optional[str] = Form(""),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # external_sources가 문자열로 오면 파싱해줌
-    try:
-        ext_sources = json.loads(external_sources) if external_sources else []
-    except Exception:
-        ext_sources = []
+    print("💬 [DEBUG] external_sources (list):", external_sources)
 
     from src.schemas.content_schema import ContentInput  # ContentInput import 위치 맞게 수정
 
@@ -52,7 +48,7 @@ def store_content_input(
         gender_target=gender_target,
         age_range_target=age_range_target,
         content_format=content_format,
-        external_sources=ext_sources,
+        external_sources=external_sources,
         user_prompt=user_prompt,
     )
 
