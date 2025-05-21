@@ -133,7 +133,7 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
             key = key.strip()
             external_data_id = EXTERNAL_DATA_MAP.get(key)
             if external_data_id:
-                ext = db.query(ExternalData).filter(externalData.external_data_id == external_data_id).first()
+                ext = db.query(ExternalData).filter(ExternalData.external_data_id == external_data_id).first()
                 if ext:
                     external_data_objs.append(ext)
 
