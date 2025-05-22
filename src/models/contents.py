@@ -24,7 +24,7 @@ class Content(Base):
     is_shared = Column(Boolean, default=False)
     is_copied = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    store_id = Column(BigInteger, ForeignKey("stores.store_id"), nullable=True)
+    store_id = Column(BigInteger, ForeignKey("stores.store_id", ondelete="CASCADE"), nullable=True)
 
     external_data_list = relationship(
         "ExternalData",
