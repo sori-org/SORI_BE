@@ -11,6 +11,7 @@ from src.models.users import User
 from src.models.stores import Store
 from sqlalchemy.orm import Session
 from src.services.external_api import get_external_data_multi
+from PIL import Image, ImageDraw, ImageFont
 import base64
 import requests
 import os
@@ -132,6 +133,63 @@ def generate_marketing_image(content: Content, db: Session) -> str:
     if user_image_description:
         external_data_text += f"\n유저 제공 이미지: {user_image_description}"
 
+    if format_name == "post_cover+text":
+        # 유저 제공 이미지가 없으면 예외 처리
+        if not content.user_image_url:
+            raise Exception("post_cover+text 포맷에는 유저 이미지가 필요합니다.")
+
+        # 자막(텍스트) 생성 - 원하는 문구를 생성하거나 직접 입력받은 텍스트 사용
+        # 이미지 자막 생성 프롬프트 (예시)
+        caption_prompt = f"""
+        아래 모든 정보를 참고해서, 유저가 업로드한 이미지를 위한 홍보 자막을 20자 이내로 만들어줘.
+        자막은 한글로 명확하게, 강조 단어는 노란색으로 표시(예: <노란색>단어</노란색>).
+        - 설명(유저 요청): {content.request_text}
+        - 가게 설명: {store_description}
+        - 상품명: {item_name}
+        - 외부 데이터: {external_data_text}
+        """
+        # GPT로 자막 생성 요청 (기존 LLM 활용)
+        _, llm = build_chain()
+        try:
+            result = llm.invoke(caption_prompt)
+            caption_text = result.content.strip() if hasattr(result, "content") else result.strip()
+        except Exception as e:
+            print("자막 생성 실패:", e)
+            caption_text = content.request_text or "최고의 상품!"
+
+
+
+        # 이미지 경로 읽기
+        image_path = content.user_image_url
+        # 서버/로컬 경로 맞게 수정
+        if image_path.startswith("/uploaded_images/"):
+            image_path = image_path.replace("/uploaded_images/", "uploaded_images/")
+
+        with Image.open(image_path) as im:
+            draw = ImageDraw.Draw(im)
+
+            # 폰트 설정 (서버에 한글 폰트가 필요함)
+            font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"  # 경로 확인 필요
+            font = ImageFont.truetype(font_path, 40)
+            text_color = (255, 255, 255)  # 기본 흰색
+            stroke_color = (0, 0, 0)  # 검정 테두리
+
+            # 텍스트 위치 계산 (하단 중앙)
+            w, h = im.size
+            text_w, text_h = draw.textsize(caption_text, font=font)
+            x = (w - text_w) // 2
+            y = h - text_h - 40
+
+            # 테두리(아웃라인) 포함 텍스트 그리기
+            draw.text((x, y), caption_text, font=font, fill=text_color, stroke_width=3, stroke_fill=stroke_color)
+
+            # 저장
+            save_path = f"generated_images/content_{content.content_id}.png"
+            im.save(save_path)
+            content.image_url = save_path
+            db.commit()
+            return save_path
+
     print("\n=== 선택된 카테고리 정보 ===")
     print(f"Platform: {platform_name}")
     print(f"Item: {item_name}")
@@ -187,7 +245,7 @@ def generate_marketing_image(content: Content, db: Session) -> str:
             "prompt": final_prompt,
             "n": 1,
             "size": "1024x1024",
-            "quality": "medium"
+            "quality": "high"
         }
     )
 

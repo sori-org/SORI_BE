@@ -15,6 +15,8 @@ User Request Text: {user_request} // optional
 store_description (optional, required only if item == "store")
 User Image: {user_image_description} // optional
 
+**All generated images must be exactly 1024x1024 pixels in size. For all formats, whenever text is overlaid or rendered, ensure the text is NEVER cut off or cropped. Always provide enough bottom padding/margin so that ALL text is fully and clearly visible within the image canvas.**
+
 1. If platform is "naver_cafe", do NOT generate any image or prompt. Respond: "Image generation is skipped for Naver Cafe."
 2. If platform is "instagram", ensure the image has 4:5 aspect ratio. Use black padding to fill empty space if needed.
 3. Only use the selected external data. Ignore all others.
@@ -35,7 +37,7 @@ The store description may include details such as concept, atmosphere, interior 
 
 Must respond with following format:
 
-## AI Image Prompt
+## If Format is "cut_toon":
 
 Create a 4-panel Korean comic strip that promotes the item through a short narrative.
 
@@ -60,15 +62,14 @@ Create a 4-panel Korean comic strip that promotes the item through a short narra
 - Focus on charm and humor while keeping the purpose of marketing clear.
 
 ### If Format is "post_cover+text":
+- Do not generate any image.
+- Create a **short Korean subtitle** (max 20 characters) at the bottom.
+- Text must be in **white with black outline**, and important words in **strong color**.
+
+### If Format is "image+text":
 Create a **fully illustrated image** that matches the platform, age, gender, and item type.
 - Style should be **exaggerated and decorative**: flashy colors, outlined objects, composition emphasizing the product or store.
 - Overlay one **short Korean subtitle** (max 20 characters) at the bottom.
 - Text must be in **white with black outline**, and important words in **strong color**.
+- **The image must be 1024x1024 pixels. Place the subtitle with ample bottom padding so it is never cropped or cut off.**
 - Reflect user request and relevant external data in both visuals and caption.
-
-### If Format is "image+text":
-Generate one short Korean caption (max 20 characters) to overlay on the **provided image**.
-- The caption must match the age/gender/platform context.
-- Text must be **white with black outline**, and **highlight key word(s) in different color**.
-- Place the text on **bottom of the image**.
-- Do NOT generate or modify the image itself.
