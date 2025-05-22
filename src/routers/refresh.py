@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 # [0] 카카오 access_token 재발급
-@router.post("/refresh", summary="카카오 access_token 재발급", description="저장된 refresh_token을 사용해서 새로운 access_token을 발급받음.")
+@router.post("/kakao/refresh", summary="카카오 access_token 재발급", description="저장된 refresh_token을 사용해서 새로운 access_token을 발급받음.")
 def refresh_kakao_access_token(
     refresh_token: str = Cookie(...),
     db: Session = Depends(get_db)
@@ -40,3 +40,4 @@ def refresh_kakao_access_token(
         raise HTTPException(status_code=500, detail="access_token 누락")
 
     return {"access_token": new_access_token}
+

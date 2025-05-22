@@ -26,16 +26,6 @@ def delete_refresh_token(db: Session, account_id: int):
     db.refresh(account)
     return account
 
-def delete_refresh_token(db: Session, account_id: int):
-    account = db.query(Account).filter(Account.account_id == account_id).first()
-    if not account:
-        raise ValueError("Account not found")
-
-    account.refresh_token = None
-    db.commit()
-    db.refresh(account)
-    return account
-
 def verify_refresh_token(db: Session, account_id: int, received_token: str) -> bool:
     account = db.query(Account).filter(Account.account_id == account_id).first()
     if not account or not account.refresh_token:
