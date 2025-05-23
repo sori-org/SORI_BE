@@ -30,7 +30,7 @@ class KakaoCallbackPayload(BaseModel):
     code: str = Field(..., example="abc123인가코드")
     redirectUri: str = Field(..., example="http://yourserver.com/api/auth/kakao/callback")
 
-def process_kakao_login(code: str, redirect_uri: str, db: Session):
+def login(code: str, redirect_uri: str, db: Session):
     data = {
         "grant_type": "authorization_code",
         "client_id": REST_API_KEY,
