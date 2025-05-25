@@ -40,6 +40,6 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
     volumes:
       - ./generated_images:/app/generated_images
-      - /home/ubuntu/uploaded_images:/app/uploaded_images
+      - ./uploaded_images:/app/src/uploaded_images
 volumes:
   sori_data:
