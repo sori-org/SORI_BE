@@ -66,7 +66,7 @@ async def kakao_callback_get(code: str, db: Session = Depends(get_db)):
     redirect_uri = os.getenv("KAKAO_REDIRECT_URI")
     user, jwt_access_token, jwt_refresh_token = login(code, redirect_uri, db)
     response = JSONResponse(content={
-        "jwt_access_token": jwt_access_token,
+        "jwt_token": jwt_access_token,
         "user": UserOut.from_orm(user).dict(),
     })
     response.set_cookie(
@@ -88,7 +88,7 @@ async def kakao_callback_post(
 ):
     user, jwt_access_token, jwt_refresh_token = login(payload.code, payload.redirectUri, db)
     response = JSONResponse(content={
-        "jwt_access_token": jwt_access_token,
+        "jwt_token": jwt_access_token,
         "user": UserOut.from_orm(user).dict(),
     })
     response.set_cookie(
