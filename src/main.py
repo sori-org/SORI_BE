@@ -10,6 +10,17 @@ from fastapi.openapi.utils import get_openapi
 
 import logging, os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GENERATED_IMAGES_PATH = os.path.join(BASE_DIR, "generated_images")
+UPLOADED_IMAGES_PATH = os.path.join(BASE_DIR, "uploaded_images")
+print("======== 경로 체크 (실제 경로) ========")
+print("os.getcwd():", os.getcwd())
+print("os.path.abspath('generated_images'):", os.path.abspath("generated_images"))
+print("GENERATED_IMAGES_PATH:", GENERATED_IMAGES_PATH)
+print("UPLOADED_IMAGES_PATH:", UPLOADED_IMAGES_PATH)
+print("실제 generated_images 파일 목록:", os.listdir(GENERATED_IMAGES_PATH))
+print("실제 uploaded_images 파일 목록:", os.listdir(UPLOADED_IMAGES_PATH))
+print("=======================================")
 
 # UTF8 Response 설정
 class UTF8JSONResponse(JSONResponse):
@@ -49,17 +60,6 @@ app.include_router(store.router)
 app.include_router(search.router)
 app.include_router(content.router)
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GENERATED_IMAGES_PATH = os.path.join(BASE_DIR, "generated_images")
-UPLOADED_IMAGES_PATH = os.path.join(BASE_DIR, "uploaded_images")
-print("======== 경로 체크 (실제 경로) ========")
-print("os.getcwd():", os.getcwd())
-print("os.path.abspath('generated_images'):", os.path.abspath("generated_images"))
-print("GENERATED_IMAGES_PATH:", GENERATED_IMAGES_PATH)
-print("UPLOADED_IMAGES_PATH:", UPLOADED_IMAGES_PATH)
-print("실제 generated_images 파일 목록:", os.listdir(GENERATED_IMAGES_PATH))
-print("실제 uploaded_images 파일 목록:", os.listdir(UPLOADED_IMAGES_PATH))
-print("=======================================")
 
 app.mount("/generated_images", StaticFiles(directory=GENERATED_IMAGES_PATH), name="generated_images")
 app.mount("/uploaded_images", StaticFiles(directory=UPLOADED_IMAGES_PATH), name="uploaded_images")
