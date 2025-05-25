@@ -18,7 +18,7 @@ User Image: {user_image_description} // optional
 **All generated images must be exactly 1024x1024 pixels in size. For all formats, whenever text is overlaid or rendered, ensure the text is NEVER cut off or cropped. Always provide enough bottom padding/margin so that ALL text is fully and clearly visible within the image canvas.**
 
 1. If platform is "naver_cafe", do NOT generate any image or prompt. Respond: "Image generation is skipped for Naver Cafe."
-2. If platform is "instagram", ensure the image has 4:5 aspect ratio. Use black padding to fill empty space if needed.
+2. If platform is "instagram", ensure the image has 4:5 aspect ratio. Use black padding to fill empty space.
 3. Only use the selected external data. Ignore all others.
 4. Do NOT use any external data if it has no meaningful relevance to the item.
 5. Integrate the user request text clearly into the final message or image concept.
@@ -35,54 +35,34 @@ The store description may include details such as concept, atmosphere, interior 
 
 ### Response Format
 
-Must respond with following format:
-
+### If Format is "cut_toon":
 Important Rendering Instructions:
-
 Each panel must contain Korean text that is fully rendered, clearly legible, and not broken, distorted, or replaced with placeholder symbols.
-
 Do NOT use speech bubbles.
-
 Instead, make the bottom quarter (1/4) of each panel a white rectangular area, separated from the main art, dedicated for the caption.
-
 Each caption must be in Korean, maximum 10 characters, and placed in the center of the white area at the bottom of each panel.
-
 Ensure the caption area does not interfere with the artwork above.
-
 If needed, add black padding to ensure the white caption area is fully inside the canvas.
-
 Art Style Instructions:
-
 Use a 4:5 aspect ratio layout.
-
 Panels should feature cute, round, simple characters (like blob or animal shapes).
-
 Use pastel or warm color tones, thick lines, and expressive faces.
-
 Follow a playful and promotional tone matching the target age and gender group.
-
 Story Rules:
-
 The comic must include a light narrative or situation that helps promote the item naturally.
-
 Reflect the user's request text in the story through dialogue or scene setup.
-
 If external data (like trends, events, or reviews) is relevant to the item, include it naturally in the story.
-
 Final Note:
-
 Absolutely NO speech bubbles anywhere in the comic.
-
 All panel captions must appear only in the bottom white area.
-
 Focus on charm and humor while keeping the purpose of marketing clear.
-
 
 
 ### If Format is "post_cover+text":
 - Do not generate any image.
 - Create a **short Korean subtitle** (max 20 characters) at the bottom.
 - Text must be in **white with black outline**, and important words in **strong color**.
+
 
 ### If Format is "image+text":
 Create a **fully illustrated image** that matches the platform, age, gender, and item type.
@@ -91,4 +71,4 @@ Create a **fully illustrated image** that matches the platform, age, gender, and
 - Text must be in **white with black outline**, and important words in **strong color**.
 - **The image must be 1024x1024 pixels. Place the subtitle with ample bottom padding so it is never cropped or cut off.**
 - Reflect user request and relevant external data in both visuals and caption.
-- If platform is "X", do not create the subtitle.
+- If platform is "X", do not create the subtitle and the image must be realistic.
