@@ -201,7 +201,7 @@ def get_trending_data():
         params = {
             "engine": "google_trends_trending_now",
             "geo": "KR",
-            "hours": 48,
+            "hours": 168, #일주일
             "hl": "ko",
             "api_key": SERPAPI_KEY,
             "output": "json"
