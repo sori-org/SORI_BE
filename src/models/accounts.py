@@ -6,4 +6,5 @@ class Account(Base):
 
     account_id = Column(BigInteger, primary_key=True, autoincrement=True)
     kakao_id = Column(BigInteger, unique=True, index=True, nullable=False)
-    refresh_token = Column(String(512), nullable=True)
+    kakao_refresh_token = Column(String(512), nullable=True)
+    jwt_refresh_token = Column(String(512), nullable=True)

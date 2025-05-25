@@ -164,21 +164,23 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
     # GPT 전체 응답 → 문구 + 해시태그 추출
     base_prompt = load_prompt_for_sns(data.sns_platform)
 
-    # store 정보 문자열 생성
-    store_info = f"""가게 이름: {store.store_name}
-    주소: {store.store_address}
-    전화번호: {store.store_phone}
-    """
+    store_info = (
+    f"가게 이름: {store.store_name}\n"
+    f"주소: {store.store_address}\n"
+    f"전화번호: {store.store_phone}"
+    )
 
 
-    full_prompt = f"""{base_prompt}
-
-    <가게 정보>
-    {store_info}
-
-    <추가 정보>
-    {external_context}
-    """
+    full_prompt = (
+    f"{base_prompt}\n\n"
+    f"<추가 정보>\n"
+    f"- 홍보 대상: {data.promotion_name}\n"
+    f"- 타겟층: {data.gender_target}, {data.age_range_target}\n"
+    f"- 콘텐츠 형식: {data.content_format}\n"
+    f"- 외부 정보:\n{external_context}\n"
+    f"- 추가 설명:\n{data.user_prompt}\n"
+    f"<가게 정보>\n{store_info}"
+    )
     full_response = gpt_generate_text(full_prompt, platform=data.sns_platform)
     result_text, result_hashtag = split_gpt_response(full_response, platform=data.sns_platform)
 
