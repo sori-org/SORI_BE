@@ -56,7 +56,7 @@ def login(code: str, redirect_uri: str, db: Session):
     jwt_token = create_jwt_token(data={"sub": str(user.user_id)})
     jwt_refresh_token = create_jwt_refresh_token(data={"sub": str(user.user_id)})
 
-    return user, jwt_access_token, jwt_refresh_token
+    return user, jwt_token, jwt_refresh_token
 
 
 

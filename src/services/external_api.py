@@ -289,3 +289,6 @@ def get_external_data_multi(external_data_names: list[str], address: str, name: 
         results.append(result)
 
     return "\n\n".join(results)
+
+reviews = get_google_reviews("겐코 복정점", "송파구 송파대로 167 a동 지하1층 110호")
+print(reviews)

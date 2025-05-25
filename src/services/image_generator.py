@@ -108,6 +108,17 @@ def build_chain():
     llm = ChatOpenAI(model="gpt-4.1", temperature=0.7)
     return prompt, llm
 
+def build_caption_llm():
+    # 시스템 메시지: 만화 컷, 자막 모두를 지원하도록 범용화
+    system_message = (
+        "너는 마케팅 만화/이미지 자막 생성 도우미다. "
+        "입력된 정보를 바탕으로 20자 이내의 한글 자막이나 대사를 만들어라. "
+        "강조 단어는 <노란색> ... </노란색> 태그로 감싼다. "
+        "cut_toon(4컷 만화)일 경우, 각 컷마다 적절한 대사를 순서대로 줄바꿈해서 만들어줘."
+    )
+    llm = ChatOpenAI(model="gpt-4.1", temperature=0.7)
+    return system_message, llm
+
 def generate_marketing_image(content: Content, db: Session) -> str:
     store_name, store_address, store_description = get_store_info(db, content.user_id)
     if not store_name or not store_address:
@@ -134,30 +145,21 @@ def generate_marketing_image(content: Content, db: Session) -> str:
         external_data_text += f"\n유저 제공 이미지: {user_image_description}"
 
     if format_name == "post_cover+text":
-        # 유저 제공 이미지가 없으면 예외 처리
-        if not content.user_image_url:
-            raise Exception("post_cover+text 포맷에는 유저 이미지가 필요합니다.")
-
-        # 자막(텍스트) 생성 - 원하는 문구를 생성하거나 직접 입력받은 텍스트 사용
-        # 이미지 자막 생성 프롬프트 (예시)
-        caption_prompt = f"""
-        아래 모든 정보를 참고해서, 유저가 업로드한 이미지를 위한 홍보 자막을 20자 이내로 만들어줘.
-        자막은 한글로 명확하게, 강조 단어는 노란색으로 표시(예: <노란색>단어</노란색>).
-        - 설명(유저 요청): {content.request_text}
+        # ... (생략)
+        system_message, caption_llm = build_caption_llm()
+        prompt = f"""아래 정보를 참고해서 20자 이내의 한글 자막을 만들어라.
+        - 유저 요청: {content.request_text}
         - 가게 설명: {store_description}
         - 상품명: {item_name}
         - 외부 데이터: {external_data_text}
         """
-        # GPT로 자막 생성 요청 (기존 LLM 활용)
-        _, llm = build_chain()
-        try:
-            result = llm.invoke(caption_prompt)
-            caption_text = result.content.strip() if hasattr(result, "content") else result.strip()
-        except Exception as e:
-            print("자막 생성 실패:", e)
-            caption_text = content.request_text or "최고의 상품!"
-
-
+        result = caption_llm.invoke(
+            [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        caption_text = result.content.strip()
 
         # 이미지 경로 읽기
         image_path = content.user_image_url
@@ -189,7 +191,23 @@ def generate_marketing_image(content: Content, db: Session) -> str:
             content.image_url = save_path
             db.commit()
             return save_path
-
+    if format_name == "cut_toon":
+        # ... (필요한 데이터 수집)
+        system_message, caption_llm = build_caption_llm()
+        prompt = f"""아래 정보를 참고해서 4컷 만화의 각 컷에 어울리는 대사를 4줄로 만들어라.
+        - 유저 요청: {content.request_text}
+        - 가게 설명: {store_description}
+        - 상품명: {item_name}
+        - 외부 데이터: {external_data_text}
+        """
+        result = caption_llm.invoke(
+            [
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": prompt}
+            ]
+        )
+        # result.content는 4줄 대사(각 컷별)
+        cut_toon_captions = result.content.strip().split('\n')
     print("\n=== 선택된 카테고리 정보 ===")
     print(f"Platform: {platform_name}")
     print(f"Item: {item_name}")

@@ -174,6 +174,7 @@ def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> 
 - 추가 설명:
 {data.user_prompt}
 """
+    print(full_prompt)
     full_response = gpt_generate_text(full_prompt, platform=data.sns_platform)
     result_text, result_hashtag = split_gpt_response(full_response, platform=data.sns_platform)
 
