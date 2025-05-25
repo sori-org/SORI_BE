@@ -10,6 +10,7 @@ from fastapi.openapi.utils import get_openapi
 
 import logging, os
 
+
 # UTF8 Response 설정
 class UTF8JSONResponse(JSONResponse):
     def render(self, content: any) -> bytes:
@@ -48,8 +49,17 @@ app.include_router(store.router)
 app.include_router(search.router)
 app.include_router(content.router)
 
-app.mount("/generated_images", StaticFiles(directory="generated_images"), name="generates")
-app.mount("/uploaded_images", StaticFiles(directory="uploaded_images"), name="uploads")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GENERATED_IMAGES_PATH = os.path.join(BASE_DIR, "generated_images")
+UPLOADED_IMAGES_PATH = os.path.join(BASE_DIR, "uploaded_images")
+print("==== STATIC GENERATED IMAGES PATH ====")
+print(GENERATED_IMAGES_PATH)
+print("==== STATIC UPLOADED IMAGES PATH ====")
+print(UPLOADED_IMAGES_PATH)
+print("======================================")
+
+app.mount("/generated_images", StaticFiles(directory=GENERATED_IMAGES_PATH), name="generated_images")
+app.mount("/uploaded_images", StaticFiles(directory=UPLOADED_IMAGES_PATH), name="uploaded_images")
 
 def custom_openapi():
     if app.openapi_schema:

@@ -189,6 +189,7 @@ def upload_user_image(
 
     image_url = f"/uploaded_images/{filename}"
     content.user_image_url = image_url
+    print(f"💾 저장 직전: content.user_image_url = {content.user_image_url}")
     db.commit()
     return {"message": "콘텐츠 이미지 업로드 완료", "user_image_url": image_url}
 
