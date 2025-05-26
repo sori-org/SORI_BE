@@ -57,6 +57,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://ec2-44-208-199-212.compute-1.amazonaws.com:8000",
+        "https://sori-erp5zroky-chungyos-projects.vercel.app/,"
     ],
     allow_credentials=True,
     allow_methods=["*"],
