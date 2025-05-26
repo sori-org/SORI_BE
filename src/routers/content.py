@@ -32,6 +32,7 @@ def store_content_input(
     content_format: str = Form(...),
     external_sources: List[str] = Form(default=[]),
     user_prompt: Optional[str] = Form(""),
+    user_image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -60,8 +61,17 @@ def store_content_input(
     if content.user_id != current_user.user_id:
         raise HTTPException(status_code=403, detail="콘텐츠 소유자 불일치")
 
-    image_url = generate_marketing_image(content, db)
+    #이미지 파일이 있으면 저장
+    if user_image is not None:
+        ext = os.path.splitext(user_image.filename)[1]
+        filename = f"content_{content_id}_uploaded_image{ext}"
+        file_path = os.path.join("uploaded_images", filename)
+        with open(file_path, "wb") as f:
+            f.write(user_image.file.read())
+        user_image_url = f"/uploaded_images/{filename}"
+        content.user_image_url = user_image_url  # user_image_url 컬럼에 저장
 
+    image_url = generate_marketing_image(content, db)
     content.image_url = image_url
     try:
         db.commit()
