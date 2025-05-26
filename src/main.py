@@ -28,16 +28,6 @@ class UTF8JSONResponse(JSONResponse):
         self.media_type = "application/json; charset=utf-8"
         return super().render(content)
 
-@app.middleware("http")
-async def add_cors_for_generated_images(request: Request, call_next):
-    response: Response = await call_next(request)
-    if request.method == "GET" and request.url.path.startswith("/generated_images/"):
-        # 요청이 /generated_images/로 시작하면 CORS 헤더 추가
-        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
-        response.headers["Access-Control-Allow-Methods"] = "GET"
-        response.headers["Access-Control-Allow-Headers"] = "*"
-    return response
-
 # FastAPI 앱 생성
 app = FastAPI(default_response_class=UTF8JSONResponse)
 
@@ -48,6 +38,18 @@ logging.basicConfig(level=logging.INFO)
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
+
+@app.middleware("http")
+async def add_cors_for_generated_images(request: Request, call_next):
+    response: Response = await call_next(request)
+    if request.method == "GET" and request.url.path.startswith("/generated_images/"):
+        # 요청이 /generated_images/로 시작하면 CORS 헤더 추가
+        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+        response.headers["Access-Control-Allow-Methods"] = "GET"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
 
 # CORS 설정
 app.add_middleware(
