@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from .db.database import Base, engine
 from .routers import kakao_login, users, jwt_token, refresh, content
@@ -9,6 +9,18 @@ from src.api import store, search
 from fastapi.openapi.utils import get_openapi
 
 import logging, os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GENERATED_IMAGES_PATH = os.path.join(BASE_DIR, "generated_images")
+UPLOADED_IMAGES_PATH = os.path.join(BASE_DIR, "uploaded_images")
+print("======== 경로 체크 (실제 경로) ========")
+print("os.getcwd():", os.getcwd())
+print("os.path.abspath('generated_images'):", os.path.abspath("generated_images"))
+print("GENERATED_IMAGES_PATH:", GENERATED_IMAGES_PATH)
+print("UPLOADED_IMAGES_PATH:", UPLOADED_IMAGES_PATH)
+print("실제 generated_images 파일 목록:", os.listdir(GENERATED_IMAGES_PATH))
+print("실제 uploaded_images 파일 목록:", os.listdir(UPLOADED_IMAGES_PATH))
+print("=======================================")
 
 # UTF8 Response 설정
 class UTF8JSONResponse(JSONResponse):
@@ -26,6 +38,18 @@ logging.basicConfig(level=logging.INFO)
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
+
+
+@app.middleware("http")
+async def add_cors_for_generated_images(request: Request, call_next):
+    response: Response = await call_next(request)
+    if request.method == "GET" and request.url.path.startswith("/generated_images/"):
+        # 요청이 /generated_images/로 시작하면 CORS 헤더 추가
+        response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+        response.headers["Access-Control-Allow-Methods"] = "GET"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
+
 
 # CORS 설정
 app.add_middleware(
@@ -49,8 +73,9 @@ app.include_router(store.router)
 app.include_router(search.router)
 app.include_router(content.router)
 
-app.mount("/generated_images", StaticFiles(directory="generated_images"), name="generates")
-app.mount("/uploaded_images", StaticFiles(directory="uploaded_images"), name="uploads")
+
+app.mount("/generated_images", StaticFiles(directory=GENERATED_IMAGES_PATH), name="generated_images")
+app.mount("/uploaded_images", StaticFiles(directory=UPLOADED_IMAGES_PATH), name="uploaded_images")
 
 def custom_openapi():
     if app.openapi_schema:
