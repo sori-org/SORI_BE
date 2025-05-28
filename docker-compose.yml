@@ -37,9 +37,9 @@ services:
       - .env
     depends_on:
       - db
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --log-level debug
     volumes:
       - ./generated_images:/app/generated_images
-      - /home/ubuntu/uploaded_images:/app/uploaded_images
+      - ./uploaded_images:/app/uploaded_images
 volumes:
   sori_data:

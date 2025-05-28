@@ -201,7 +201,7 @@ def get_trending_data():
         params = {
             "engine": "google_trends_trending_now",
             "geo": "KR",
-            "hours": 48,
+            "hours": 168, #일주일
             "hl": "ko",
             "api_key": SERPAPI_KEY,
             "output": "json"
@@ -232,7 +232,7 @@ def get_trending_data():
         prompt = f"다음 내용에 정치, 논란, 성적 내용, 특정 유명인의 죽음, 자살, 사고사, 타살, 범죄 관련 내용이 포함되어 있습니까? (예/아니오만 답하세요)\n\n{text}"
         try:
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=10
             )
