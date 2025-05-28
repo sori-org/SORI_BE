@@ -74,7 +74,7 @@ async def kakao_callback_get(code: str, db: Session = Depends(get_db)):
         value=jwt_refresh_token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",
         max_age=60 * 60 * 24 * 14,
         path="/"
     )
@@ -96,7 +96,7 @@ async def kakao_callback_post(
         value=jwt_refresh_token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",
         max_age=60 * 60 * 24 * 14,
         path="/"
     )
