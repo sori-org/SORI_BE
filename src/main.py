@@ -56,8 +56,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://ec2-44-208-199-212.compute-1.amazonaws.com:8000",
-        "https://sori-b7gf8575f-chungyos-projects.vercel.app,"
+        "https://sori-fe.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
