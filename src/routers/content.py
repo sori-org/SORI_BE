@@ -8,11 +8,10 @@ from src.models.users import User
 from src.models.contents import Content
 from src.models.stores import Store
 from src.services.image_generator import generate_marketing_image
-from src.schemas.contents import ContentCreate
+from src.services.content_service import delete_content_by_id
 from pydantic import BaseModel
 from uuid import uuid4
 from typing import Literal, Optional, List
-import json
 import os
 
 router = APIRouter(
@@ -203,7 +202,7 @@ def upload_user_image(
     db.commit()
     return {"message": "콘텐츠 이미지 업로드 완료", "user_image_url": image_url}
 
-# [9] 공통 업데이트 처리 함수
+# [7] 공통 업데이트 처리 함수
 def update_field(db, content_id, field_name, value):
     content = db.query(Content).filter(Content.content_id == content_id).first()
     if not content:
@@ -211,3 +210,12 @@ def update_field(db, content_id, field_name, value):
     setattr(content, field_name, value)
     db.commit()
     return {"message": f"{field_name} updated successfully"}
+
+@router.delete("/{content_id}", summary="콘텐츠 삭제")
+def delete_content(
+    content_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    delete_content_by_id(db, content_id, current_user.user_id)
+    return {"message": "콘텐츠가 삭제되었습니다."}
