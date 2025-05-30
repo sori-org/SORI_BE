@@ -15,6 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 import base64
 import requests
 import os
+import time
 
 api_key = os.getenv("OPENAI_API_KEY")
 MAX_PROMPT_LENGTH = 4000
@@ -140,7 +141,11 @@ def generate_marketing_image(content: Content, db: Session) -> str:
 
     external_data_text = get_external_data_multi(external_data_names, store_address, store_name)
 
+    start_vision = time.time()
     user_image_description = describe_user_image(content)
+    end_vision = time.time()
+    print(f"이미지 설명(vision) 소요 시간: {end_vision - start_vision:.2f}초")
+
     if user_image_description:
         external_data_text += f"\n유저 제공 이미지: {user_image_description}"
 
@@ -255,6 +260,7 @@ def generate_marketing_image(content: Content, db: Session) -> str:
     print(final_prompt)
     print("================================\n")
 
+    start_dalle = time.time()
     dalle_res = requests.post(
         "https://api.openai.com/v1/images/generations",
         headers={"Authorization": f"Bearer {api_key}"},
@@ -266,7 +272,8 @@ def generate_marketing_image(content: Content, db: Session) -> str:
             "quality": "high"
         }
     )
-
+    end_dalle = time.time()
+    print(f"DALL·E 이미지 생성 소요 시간: {end_dalle - start_dalle:.2f}초")
 
     if dalle_res.status_code != 200:
         raise Exception(f"GPT Image 1 API 호출 실패: {dalle_res.status_code}, {dalle_res.text}")
