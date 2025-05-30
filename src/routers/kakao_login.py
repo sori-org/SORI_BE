@@ -108,7 +108,7 @@ def logout(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    account = db.query(Account).filter(Account.user_id == current_user.user_id).first()
+    account = db.query(Account).filter(Account.account_id == current_user.account_id).first()
     if account:
         account.kakao_refresh_token = None
         db.commit()
