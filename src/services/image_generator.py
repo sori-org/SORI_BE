@@ -226,23 +226,6 @@ def generate_marketing_image(content: Content, db: Session) -> str:
         content.image_url = save_path
         db.commit()
         return save_path
-    if format_name == "cut_toon":
-        # ... (필요한 데이터 수집)
-        system_message, caption_llm = build_caption_llm()
-        prompt = f"""아래 정보를 참고해서 4컷 만화의 각 컷에 어울리는 대사를 4줄로 만들어라.
-        - 유저 요청: {content.request_text}
-        - 가게 설명: {store_description}
-        - 상품명: {item_name}
-        - 외부 데이터: {external_data_text}
-        """
-        result = caption_llm.invoke(
-            [
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        # result.content는 4줄 대사(각 컷별)
-        cut_toon_captions = result.content.strip().split('\n')
     print("\n=== 선택된 카테고리 정보 ===")
     print(f"Platform: {platform_name}")
     print(f"Item: {item_name}")
