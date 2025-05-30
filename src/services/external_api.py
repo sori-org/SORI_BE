@@ -7,6 +7,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def check_with_keywords(text):
+    # 검열할 금칙어 리스트
+    keywords = [
+        "사망", "논란", "성폭력", "비극", "참사", "인명피해",
+        "살인", "자살", "타살", "범죄", "피살", "강간", "정치"
+        "음란", "추행", "테러", "방화", "폭력", "폭행", "국회의원", "대통령", "법원"
+        # 필요시 더 추가
+    ]
+    # 소문자/한글 정규화 처리(필요시)
+    for word in keywords:
+        if word in text:
+            return True  # 검열 대상
+    return False  # 안전
 
 #주소에서 좌표 조회(행사)
 def get_coordinates_from_address(address: str) -> tuple:
@@ -194,7 +207,6 @@ def get_trending_data():
     SERPAPI_KEY = os.getenv("SERP_API_KEY")
     NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID")
     NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
-    client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     def get_top_queries():
         endpoint = "https://serpapi.com/search"
@@ -228,19 +240,6 @@ def get_trending_data():
         items = response.json().get('items', [])
         return " ".join([item.get('description', '') for item in items])
 
-    def check_with_openai(text):
-        prompt = f"다음 내용에 정치, 논란, 성적 내용, 특정 유명인의 죽음, 자살, 사고사, 타살, 범죄 관련 내용이 포함되어 있습니까? (예/아니오만 답하세요)\n\n{text}"
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=10
-            )
-            answer = response.choices[0].message.content.strip()
-            return '예' in answer
-        except Exception as e:
-            print("OpenAI error:", e)
-            return True  # 에러 발생 시 차단 처리
 
     top_queries = get_top_queries()
     safe_queries = []
@@ -249,7 +248,7 @@ def get_trending_data():
         news_summary = search_naver_news(query)
         if not news_summary:
             continue
-        if not check_with_openai(news_summary):
+        if not check_with_keywords(news_summary):  # True면 검열, False면 통과
             safe_queries.append((query, news_summary))
 
     return safe_queries
