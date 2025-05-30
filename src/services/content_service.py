@@ -111,8 +111,18 @@ def split_gpt_response(response: str, platform: str) -> tuple[str, str]:
             return clean_text, hashtag_line
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"GPT 응답 파싱 실패: {str(e)}")
+#콘텐츠 제거
+def delete_content_by_id(db: Session, content_id: int, user_id: int):
+    content = db.query(Content).filter(
+        Content.content_id == content_id,
+        Content.user_id == user_id
+    ).first()
 
+    if not content:
+        raise HTTPException(status_code=404, detail="콘텐츠를 찾을 수 없습니다.")
 
+    db.delete(content)
+    db.commit()
 # 콘텐츠 생성 및 DB 저장
 def save_content_and_generate(db: Session, user_id: int, data: ContentInput) -> int:
     # 외부 데이터 수집

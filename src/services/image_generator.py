@@ -16,6 +16,7 @@ import base64
 import requests
 import os
 import time
+import re
 
 api_key = os.getenv("OPENAI_API_KEY")
 MAX_PROMPT_LENGTH = 4000
@@ -85,6 +86,48 @@ def describe_user_image(content: Content) -> str:
     result = response.json()
     description = result["choices"][0]["message"]["content"].strip()
     return description
+
+def get_max_fontsize_for_box(text, font_path, box_width, box_height, max_font=150, min_font=50):
+    # 박스 높이에 맞게 폰트 자동 조정
+    for size in range(max_font, min_font-1, -2):
+        font = ImageFont.truetype(font_path, size)
+        bbox = font.getbbox(text)
+        text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+        if text_w <= box_width * 0.9 and text_h <= box_height * 0.8:
+            return font
+    return ImageFont.truetype(font_path, min_font)
+
+def draw_ad_caption(im, caption, font_path):
+    w, h = im.size
+    CAPTION_HEIGHT = int(h * 0.18)  # 하단 18%
+    draw = ImageDraw.Draw(im)
+
+    # 하단 박스
+    draw.rectangle([0, h-CAPTION_HEIGHT, w, h], fill=(0,0,0,220))  # 반투명 검정 등도 가능
+
+    # 폰트 결정(박스에 맞춰 크게)
+    font = get_max_fontsize_for_box(re.sub(r'<노란색>|</노란색>', '', caption), font_path, w, CAPTION_HEIGHT)
+    bbox = draw.textbbox((0,0), re.sub(r'<노란색>|</노란색>', '', caption), font=font)
+    text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    x = (w - text_w) // 2
+    y = h - CAPTION_HEIGHT + (CAPTION_HEIGHT - text_h)//2
+
+    # 색 강조
+    def draw_colored(draw, pos, text, font, base, highlight, stroke=4):
+        cur = pos[0]
+        for part in re.split(r'(<노란색>.*?</노란색>)', text):
+            if part.startswith('<노란색>') and part.endswith('</노란색>'):
+                t = part[5:-6]
+                color = highlight
+            else:
+                t = part
+                color = base
+            draw.text((cur, pos[1]), t, font=font, fill=color, stroke_width=stroke, stroke_fill=(0,0,0))
+            cur += font.getlength(t)
+    # 예시: draw_colored(draw, (x, y), caption, font, (255,255,255), (255,212,0), 4)
+    draw_colored(draw, (x, y), caption, font, (255,255,255), (255,212,0), 4)
+
+    return im
 
 def build_chain():
     system_message = load_system_message("src/prompts/image_prompt.txt")
@@ -172,30 +215,17 @@ def generate_marketing_image(content: Content, db: Session) -> str:
         if image_path.startswith("/uploaded_images/"):
             image_path = image_path.replace("/uploaded_images/", "uploaded_images/")
 
-        with Image.open(image_path) as im:
-            draw = ImageDraw.Draw(im)
+        im = Image.open(image_path)
+        if im.size != (1024, 1024):
+            im = im.resize((1024, 1024), Image.LANCZOS)
+        draw_ad_caption(im, caption_text, "./SB_aggro_B.ttf")
 
-            # 폰트 설정 (서버에 한글 폰트가 필요함)
-            font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"  # 경로 확인 필요
-            font = ImageFont.truetype(font_path, 40)
-            text_color = (255, 255, 255)  # 기본 흰색
-            stroke_color = (0, 0, 0)  # 검정 테두리
-
-            # 텍스트 위치 계산 (하단 중앙)
-            w, h = im.size
-            text_w, text_h = draw.textsize(caption_text, font=font)
-            x = (w - text_w) // 2
-            y = h - text_h - 40
-
-            # 테두리(아웃라인) 포함 텍스트 그리기
-            draw.text((x, y), caption_text, font=font, fill=text_color, stroke_width=3, stroke_fill=stroke_color)
-
-            # 저장
-            save_path = f"generated_images/content_{content.content_id}.png"
-            im.save(save_path)
-            content.image_url = save_path
-            db.commit()
-            return save_path
+        # 저장
+        save_path = f"generated_images/content_{content.content_id}.png"
+        im.save(save_path)
+        content.image_url = save_path
+        db.commit()
+        return save_path
     if format_name == "cut_toon":
         # ... (필요한 데이터 수집)
         system_message, caption_llm = build_caption_llm()

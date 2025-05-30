@@ -8,11 +8,10 @@ from src.models.users import User
 from src.models.contents import Content
 from src.models.stores import Store
 from src.services.image_generator import generate_marketing_image
-from src.schemas.contents import ContentCreate
+from src.services.content_service import delete_content_by_id
 from pydantic import BaseModel
 from uuid import uuid4
 from typing import Literal, Optional, List
-import json
 import os
 
 router = APIRouter(
@@ -32,6 +31,7 @@ def store_content_input(
     content_format: str = Form(...),
     external_sources: List[str] = Form(default=[]),
     user_prompt: Optional[str] = Form(""),
+    user_image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -60,8 +60,17 @@ def store_content_input(
     if content.user_id != current_user.user_id:
         raise HTTPException(status_code=403, detail="콘텐츠 소유자 불일치")
 
-    image_url = generate_marketing_image(content, db)
+    #이미지 파일이 있으면 저장
+    if user_image is not None:
+        ext = os.path.splitext(user_image.filename)[1]
+        filename = f"content_{content_id}_uploaded_image{ext}"
+        file_path = os.path.join("uploaded_images", filename)
+        with open(file_path, "wb") as f:
+            f.write(user_image.file.read())
+        user_image_url = f"/uploaded_images/{filename}"
+        content.user_image_url = user_image_url  # user_image_url 컬럼에 저장
 
+    image_url = generate_marketing_image(content, db)
     content.image_url = image_url
     try:
         db.commit()
@@ -193,7 +202,7 @@ def upload_user_image(
     db.commit()
     return {"message": "콘텐츠 이미지 업로드 완료", "user_image_url": image_url}
 
-# [9] 공통 업데이트 처리 함수
+# [7] 공통 업데이트 처리 함수
 def update_field(db, content_id, field_name, value):
     content = db.query(Content).filter(Content.content_id == content_id).first()
     if not content:
@@ -201,3 +210,12 @@ def update_field(db, content_id, field_name, value):
     setattr(content, field_name, value)
     db.commit()
     return {"message": f"{field_name} updated successfully"}
+
+@router.delete("/{content_id}", summary="콘텐츠 삭제")
+def delete_content(
+    content_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    delete_content_by_id(db, content_id, current_user.user_id)
+    return {"message": "콘텐츠가 삭제되었습니다."}

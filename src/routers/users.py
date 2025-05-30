@@ -59,3 +59,11 @@ def get_my_stores(
         "main_store_id": current_user.main_store_id,
         "stores": store_list
     }
+
+# [4] main store id 조회
+@router.get("/{user_id}/main-store", summary="main store id 조회")
+def get_main_store_id(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"main_store_id": user.main_store_id}

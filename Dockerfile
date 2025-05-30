@@ -14,6 +14,8 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+COPY SB_aggro_B.ttf ./
+
 # 전체 코드 복사
 COPY . .
 
