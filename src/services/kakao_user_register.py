@@ -28,7 +28,7 @@ def get_or_create_kakao_user(db: Session, kakao_user_data: dict, access_token: s
         )
         db.add(new_user)
         db.commit()
-        return new_account, True
+        return new_user, True
 
     except Exception as e:
         db.rollback()
