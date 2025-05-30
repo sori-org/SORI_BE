@@ -19,7 +19,7 @@ def refresh_kakao_access_token(
     db: Session = Depends(get_db)
 ):
     hashed = hash_token(refresh_token)
-    account = db.query(Account).filter(Account.refresh_token == hashed).first()
+    account = db.query(Account).filter(Account.kakao_refresh_token == hashed).first()
 
     if not account:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
