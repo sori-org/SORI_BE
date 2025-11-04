@@ -41,7 +41,7 @@
 ---
 
 ## 📁 디렉토리 구조  
-'''
+```
 /src
 ├─ api # FastAPI 라우터 (엔드포인트)
 ├─ models # SQLAlchemy 모델 정의
@@ -49,4 +49,4 @@
 ├─ schemas # Pydantic 스키마
 ├─ utils # 공통 유틸리티 (JWT, 카카오 로그인 등)
 └─ main.py # FastAPI 앱 진입점
-'''
+```
